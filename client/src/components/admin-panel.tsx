@@ -49,10 +49,12 @@ const companyFormSchema = insertCompanySchema.extend({
   showNameWithLogo: z.boolean().nullable().transform(val => val ?? false),
   titleFontFamily: z.string().nullable().transform(val => val ?? "Inter"),
   titleFontSize: z.number().nullable().transform(val => val ?? 24),
+  titleFontWeight: z.string().nullable().transform(val => val ?? "700"),
   titleColor: z.string().nullable().transform(val => val ?? "#0f172a"),
   sloganText: z.string().nullable().transform(val => val ?? ""),
   sloganFontFamily: z.string().nullable().transform(val => val ?? "Inter"),
   sloganFontSize: z.number().nullable().transform(val => val ?? 14),
+  sloganFontWeight: z.string().nullable().transform(val => val ?? "400"),
   sloganColor: z.string().nullable().transform(val => val ?? "#64748b"),
   headerPaddingY: z.number().nullable().transform(val => val ?? 16),
   contactEmail: z.string().nullable().transform(val => val ?? ""),
@@ -73,6 +75,15 @@ const FONT_OPTIONS = [
   "Montserrat",
   "Lato",
   "Source Sans Pro",
+];
+
+const FONT_WEIGHT_OPTIONS = [
+  { value: "300", label: "Light" },
+  { value: "400", label: "Normal" },
+  { value: "500", label: "Medium" },
+  { value: "600", label: "Semibold" },
+  { value: "700", label: "Bold" },
+  { value: "800", label: "Extra Bold" },
 ];
 
 const platformFormSchema = insertPlatformSchema;
@@ -113,10 +124,12 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
       showNameWithLogo: company?.showNameWithLogo ?? false,
       titleFontFamily: company?.titleFontFamily ?? "Inter",
       titleFontSize: company?.titleFontSize ?? 24,
+      titleFontWeight: company?.titleFontWeight ?? "700",
       titleColor: company?.titleColor ?? "#0f172a",
       sloganText: company?.sloganText ?? "",
       sloganFontFamily: company?.sloganFontFamily ?? "Inter",
       sloganFontSize: company?.sloganFontSize ?? 14,
+      sloganFontWeight: company?.sloganFontWeight ?? "400",
       sloganColor: company?.sloganColor ?? "#64748b",
       headerPaddingY: company?.headerPaddingY ?? 16,
       heroTitle: company?.heroTitle ?? "",
@@ -667,7 +680,7 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
 
                     <div className="border-t pt-6 mt-6">
                       <h4 className="text-lg font-medium text-slate-900 mb-4">Title Styling</h4>
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-2 gap-4">
                         <FormField
                           control={companyForm.control}
                           name="titleFontFamily"
@@ -683,6 +696,28 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                                 <SelectContent>
                                   {FONT_OPTIONS.map((font) => (
                                     <SelectItem key={font} value={font}>{font}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={companyForm.control}
+                          name="titleFontWeight"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Title Weight</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value ?? "700"}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-title-weight">
+                                    <SelectValue placeholder="Select weight" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {FONT_WEIGHT_OPTIONS.map((opt) => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                                   ))}
                                 </SelectContent>
                               </Select>
@@ -762,7 +797,7 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                           </FormItem>
                         )}
                       />
-                      <div className="grid grid-cols-3 gap-4 mt-4">
+                      <div className="grid grid-cols-2 gap-4 mt-4">
                         <FormField
                           control={companyForm.control}
                           name="sloganFontFamily"
@@ -778,6 +813,28 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                                 <SelectContent>
                                   {FONT_OPTIONS.map((font) => (
                                     <SelectItem key={font} value={font}>{font}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={companyForm.control}
+                          name="sloganFontWeight"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Slogan Weight</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value ?? "400"}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-slogan-weight">
+                                    <SelectValue placeholder="Select weight" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {FONT_WEIGHT_OPTIONS.map((opt) => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                                   ))}
                                 </SelectContent>
                               </Select>

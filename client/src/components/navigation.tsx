@@ -45,11 +45,13 @@ export default function Navigation({ onAdminClick, company, isAuthenticated = fa
   const titleStyle = {
     fontFamily: company?.titleFontFamily ?? "Inter",
     fontSize: `${company?.titleFontSize ?? 24}px`,
+    fontWeight: company?.titleFontWeight ?? "700",
     color: company?.titleColor ?? "#0f172a",
   };
   const sloganStyle = {
     fontFamily: company?.sloganFontFamily ?? "Inter",
     fontSize: `${company?.sloganFontSize ?? 14}px`,
+    fontWeight: company?.sloganFontWeight ?? "400",
     color: company?.sloganColor ?? "#64748b",
   };
 
@@ -73,7 +75,7 @@ export default function Navigation({ onAdminClick, company, isAuthenticated = fa
             {(!company?.logo || company?.showNameWithLogo) && (
               <div className="flex flex-col">
                 <h1 
-                  className="font-bold leading-tight" 
+                  className="leading-tight" 
                   style={titleStyle}
                   data-testid="text-company-name"
                 >
