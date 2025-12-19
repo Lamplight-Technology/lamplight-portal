@@ -41,10 +41,25 @@ export default function Navigation({ onAdminClick, company, isAuthenticated = fa
     setIsMenuOpen(false);
   };
 
+  const headerPadding = company?.headerPaddingY ?? 16;
+  const titleStyle = {
+    fontFamily: company?.titleFontFamily ?? "Inter",
+    fontSize: `${company?.titleFontSize ?? 24}px`,
+    color: company?.titleColor ?? "#0f172a",
+  };
+  const sloganStyle = {
+    fontFamily: company?.sloganFontFamily ?? "Inter",
+    fontSize: `${company?.sloganFontSize ?? 14}px`,
+    color: company?.sloganColor ?? "#64748b",
+  };
+
   return (
     <nav className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div 
+          className="flex justify-between items-center"
+          style={{ paddingTop: `${headerPadding}px`, paddingBottom: `${headerPadding}px` }}
+        >
           <div className="flex items-center gap-3">
             {company?.logo && (
               <img 
@@ -56,9 +71,24 @@ export default function Navigation({ onAdminClick, company, isAuthenticated = fa
               />
             )}
             {(!company?.logo || company?.showNameWithLogo) && (
-              <h1 className="text-2xl font-bold text-lamplight-primary" data-testid="text-company-name">
-                {company?.name || "Lamplight Technology"}
-              </h1>
+              <div className="flex flex-col">
+                <h1 
+                  className="font-bold leading-tight" 
+                  style={titleStyle}
+                  data-testid="text-company-name"
+                >
+                  {company?.name || "Lamplight Technology"}
+                </h1>
+                {company?.sloganText && (
+                  <span 
+                    style={sloganStyle}
+                    className="leading-tight"
+                    data-testid="text-company-slogan"
+                  >
+                    {company.sloganText}
+                  </span>
+                )}
+              </div>
             )}
           </div>
           

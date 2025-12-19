@@ -47,6 +47,14 @@ const companyFormSchema = insertCompanySchema.extend({
   logo: z.string().nullable().transform(val => val ?? ""),
   logoHeight: z.number().nullable().transform(val => val ?? 40),
   showNameWithLogo: z.boolean().nullable().transform(val => val ?? false),
+  titleFontFamily: z.string().nullable().transform(val => val ?? "Inter"),
+  titleFontSize: z.number().nullable().transform(val => val ?? 24),
+  titleColor: z.string().nullable().transform(val => val ?? "#0f172a"),
+  sloganText: z.string().nullable().transform(val => val ?? ""),
+  sloganFontFamily: z.string().nullable().transform(val => val ?? "Inter"),
+  sloganFontSize: z.number().nullable().transform(val => val ?? 14),
+  sloganColor: z.string().nullable().transform(val => val ?? "#64748b"),
+  headerPaddingY: z.number().nullable().transform(val => val ?? 16),
   contactEmail: z.string().nullable().transform(val => val ?? ""),
   siteTitle: z.string().nullable().transform(val => val ?? ""),
   maintenanceMode: z.boolean().nullable().transform(val => val ?? false),
@@ -55,6 +63,17 @@ const companyFormSchema = insertCompanySchema.extend({
   showAbout: z.boolean().nullable().transform(val => val ?? true),
   showContact: z.boolean().nullable().transform(val => val ?? true),
 });
+
+const FONT_OPTIONS = [
+  "Inter",
+  "Roboto", 
+  "Open Sans",
+  "Poppins",
+  "Playfair Display",
+  "Montserrat",
+  "Lato",
+  "Source Sans Pro",
+];
 
 const platformFormSchema = insertPlatformSchema;
 const legalDocumentFormSchema = insertLegalDocumentSchema;
@@ -92,6 +111,14 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
       logo: company?.logo ?? "",
       logoHeight: company?.logoHeight ?? 40,
       showNameWithLogo: company?.showNameWithLogo ?? false,
+      titleFontFamily: company?.titleFontFamily ?? "Inter",
+      titleFontSize: company?.titleFontSize ?? 24,
+      titleColor: company?.titleColor ?? "#0f172a",
+      sloganText: company?.sloganText ?? "",
+      sloganFontFamily: company?.sloganFontFamily ?? "Inter",
+      sloganFontSize: company?.sloganFontSize ?? 14,
+      sloganColor: company?.sloganColor ?? "#64748b",
+      headerPaddingY: company?.headerPaddingY ?? 16,
       heroTitle: company?.heroTitle ?? "",
       heroDescription: company?.heroDescription ?? "",
       aboutTitle: company?.aboutTitle ?? "",
@@ -636,6 +663,207 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                           </FormItem>
                         )}
                       />
+                    </div>
+
+                    <div className="border-t pt-6 mt-6">
+                      <h4 className="text-lg font-medium text-slate-900 mb-4">Title Styling</h4>
+                      <div className="grid grid-cols-3 gap-4">
+                        <FormField
+                          control={companyForm.control}
+                          name="titleFontFamily"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Title Font</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value ?? "Inter"}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-title-font">
+                                    <SelectValue placeholder="Select font" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {FONT_OPTIONS.map((font) => (
+                                    <SelectItem key={font} value={font}>{font}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={companyForm.control}
+                          name="titleFontSize"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Title Size (px)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number"
+                                  min={16}
+                                  max={48}
+                                  {...field}
+                                  value={field.value ?? 24}
+                                  onChange={(e) => field.onChange(parseInt(e.target.value) || 24)}
+                                  data-testid="input-title-font-size"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={companyForm.control}
+                          name="titleColor"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Title Color</FormLabel>
+                              <FormControl>
+                                <div className="flex gap-2">
+                                  <Input 
+                                    type="color"
+                                    {...field}
+                                    value={field.value ?? "#0f172a"}
+                                    className="w-12 h-10 p-1 cursor-pointer"
+                                    data-testid="input-title-color"
+                                  />
+                                  <Input 
+                                    type="text"
+                                    {...field}
+                                    value={field.value ?? "#0f172a"}
+                                    placeholder="#0f172a"
+                                    className="flex-1"
+                                  />
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-6 mt-2">
+                      <h4 className="text-lg font-medium text-slate-900 mb-4">Slogan (Optional)</h4>
+                      <FormField
+                        control={companyForm.control}
+                        name="sloganText"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Slogan Text</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field}
+                                value={field.value ?? ""}
+                                placeholder="Your company tagline or slogan"
+                                data-testid="input-slogan-text"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="grid grid-cols-3 gap-4 mt-4">
+                        <FormField
+                          control={companyForm.control}
+                          name="sloganFontFamily"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Slogan Font</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value ?? "Inter"}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-slogan-font">
+                                    <SelectValue placeholder="Select font" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {FONT_OPTIONS.map((font) => (
+                                    <SelectItem key={font} value={font}>{font}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={companyForm.control}
+                          name="sloganFontSize"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Slogan Size (px)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number"
+                                  min={10}
+                                  max={24}
+                                  {...field}
+                                  value={field.value ?? 14}
+                                  onChange={(e) => field.onChange(parseInt(e.target.value) || 14)}
+                                  data-testid="input-slogan-font-size"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={companyForm.control}
+                          name="sloganColor"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Slogan Color</FormLabel>
+                              <FormControl>
+                                <div className="flex gap-2">
+                                  <Input 
+                                    type="color"
+                                    {...field}
+                                    value={field.value ?? "#64748b"}
+                                    className="w-12 h-10 p-1 cursor-pointer"
+                                    data-testid="input-slogan-color"
+                                  />
+                                  <Input 
+                                    type="text"
+                                    {...field}
+                                    value={field.value ?? "#64748b"}
+                                    placeholder="#64748b"
+                                    className="flex-1"
+                                  />
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-6 mt-2">
+                      <FormField
+                        control={companyForm.control}
+                        name="headerPaddingY"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Header Vertical Padding (px)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number"
+                                min={8}
+                                max={40}
+                                {...field}
+                                value={field.value ?? 16}
+                                onChange={(e) => field.onChange(parseInt(e.target.value) || 16)}
+                                data-testid="input-header-padding"
+                              />
+                            </FormControl>
+                            <p className="text-xs text-slate-500">Controls overall header height (8-40px)</p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="border-t pt-6 mt-2">
+                      <h4 className="text-lg font-medium text-slate-900 mb-4">Hero Section</h4>
                     </div>
                     <FormField
                       control={companyForm.control}
