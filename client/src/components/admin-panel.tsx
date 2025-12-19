@@ -45,6 +45,8 @@ type AdminSection = "company" | "platforms" | "legal" | "media" | "settings";
 const companyFormSchema = insertCompanySchema.extend({
   id: z.number().optional(),
   logo: z.string().nullable().transform(val => val ?? ""),
+  logoHeight: z.number().nullable().transform(val => val ?? 40),
+  showNameWithLogo: z.boolean().nullable().transform(val => val ?? false),
   contactEmail: z.string().nullable().transform(val => val ?? ""),
   siteTitle: z.string().nullable().transform(val => val ?? ""),
   maintenanceMode: z.boolean().nullable().transform(val => val ?? false),
@@ -88,6 +90,8 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
     defaultValues: {
       name: company?.name ?? "",
       logo: company?.logo ?? "",
+      logoHeight: company?.logoHeight ?? 40,
+      showNameWithLogo: company?.showNameWithLogo ?? false,
       heroTitle: company?.heroTitle ?? "",
       heroDescription: company?.heroDescription ?? "",
       aboutTitle: company?.aboutTitle ?? "",
@@ -589,6 +593,50 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                         </FormItem>
                       )}
                     />
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={companyForm.control}
+                        name="logoHeight"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Logo Height (pixels)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number"
+                                min={20}
+                                max={120}
+                                {...field}
+                                value={field.value ?? 40}
+                                onChange={(e) => field.onChange(parseInt(e.target.value) || 40)}
+                                data-testid="input-logo-height"
+                              />
+                            </FormControl>
+                            <p className="text-xs text-slate-500">Height of logo in the header (20-120px)</p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={companyForm.control}
+                        name="showNameWithLogo"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col justify-end">
+                            <div className="flex items-center space-x-3 pb-2">
+                              <FormControl>
+                                <Switch
+                                  checked={field.value ?? false}
+                                  onCheckedChange={field.onChange}
+                                  data-testid="switch-show-name-with-logo"
+                                />
+                              </FormControl>
+                              <FormLabel className="!mt-0">Show company name with logo</FormLabel>
+                            </div>
+                            <p className="text-xs text-slate-500">Display company name text next to the logo</p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                     <FormField
                       control={companyForm.control}
                       name="heroTitle"

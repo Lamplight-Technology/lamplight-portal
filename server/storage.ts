@@ -73,6 +73,8 @@ export class MemStorage implements IStorage {
       id: 1,
       name: "Lamplight Technology",
       logo: null,
+      logoHeight: 40,
+      showNameWithLogo: false,
       heroTitle: "Empowering Business Through Software Innovation",
       heroDescription: "Lamplight Technology is a leading holding company specializing in cutting-edge SaaS platforms that transform how businesses operate, scale, and succeed in the digital economy.",
       aboutTitle: "Building the Future of Software",
@@ -509,6 +511,8 @@ This Support Policy may be updated to reflect changes in our services or support
     const company: Company = { 
       ...insertCompany,
       logo: insertCompany.logo ?? null,
+      logoHeight: insertCompany.logoHeight ?? 40,
+      showNameWithLogo: insertCompany.showNameWithLogo ?? false,
       contactEmail: insertCompany.contactEmail ?? null,
       siteTitle: insertCompany.siteTitle ?? null,
       maintenanceMode: insertCompany.maintenanceMode ?? null,
