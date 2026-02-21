@@ -29,10 +29,13 @@ import {
   Link as LinkIcon,
   Loader2,
   Sparkles,
-  FileText
+  FileText,
+  LayoutGrid,
+  Tag
 } from "lucide-react";
-import type { Company, Platform, LegalDocument } from "@shared/schema";
-import { insertCompanySchema, insertPlatformSchema, insertLegalDocumentSchema } from "@shared/schema";
+import type { Company, Platform, LegalDocument, AboutFeatureCard, HeroBadge } from "@shared/schema";
+import { insertCompanySchema, insertPlatformSchema, insertLegalDocumentSchema, insertAboutFeatureCardSchema, insertHeroBadgeSchema } from "@shared/schema";
+import { IconSelector } from "@/components/icon-selector";
 
 interface AdminPanelProps {
   company?: Company;
@@ -40,7 +43,7 @@ interface AdminPanelProps {
   onClose: () => void;
 }
 
-type AdminSection = "company" | "platforms" | "legal" | "media" | "settings";
+type AdminSection = "company" | "platforms" | "feature-cards" | "hero-badges" | "legal" | "media" | "settings";
 
 const companyFormSchema = insertCompanySchema.extend({
   id: z.number().optional(),
@@ -103,13 +106,19 @@ const FONT_WEIGHT_OPTIONS = [
 
 const platformFormSchema = insertPlatformSchema;
 const legalDocumentFormSchema = insertLegalDocumentSchema;
+const featureCardFormSchema = insertAboutFeatureCardSchema;
+const heroBadgeFormSchema = insertHeroBadgeSchema;
 
 export default function AdminPanel({ company, platforms, onClose }: AdminPanelProps) {
   const [activeSection, setActiveSection] = useState<AdminSection>("company");
   const [editingPlatform, setEditingPlatform] = useState<Platform | null>(null);
   const [editingDocument, setEditingDocument] = useState<LegalDocument | null>(null);
+  const [editingFeatureCard, setEditingFeatureCard] = useState<AboutFeatureCard | null>(null);
+  const [editingHeroBadge, setEditingHeroBadge] = useState<HeroBadge | null>(null);
   const [showPlatformForm, setShowPlatformForm] = useState(false);
   const [showDocumentForm, setShowDocumentForm] = useState(false);
+  const [showFeatureCardForm, setShowFeatureCardForm] = useState(false);
+  const [showHeroBadgeForm, setShowHeroBadgeForm] = useState(false);
   const [showUrlImport, setShowUrlImport] = useState(false);
   const [showToggleConfirm, setShowToggleConfirm] = useState(false);
   const [platformToToggle, setPlatformToToggle] = useState<Platform | null>(null);
@@ -127,6 +136,16 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
       if (!response.ok) throw new Error("Failed to fetch platforms");
       return response.json();
     },
+  });
+
+  // Fetch all feature cards
+  const { data: featureCards = [], isLoading: featureCardsLoading } = useQuery<AboutFeatureCard[]>({
+    queryKey: ["/api/about-feature-cards"],
+  });
+
+  // Fetch all hero badges
+  const { data: heroBadges = [], isLoading: heroBadgesLoading } = useQuery<HeroBadge[]>({
+    queryKey: ["/api/hero-badges"],
   });
 
   // Company form
@@ -197,6 +216,33 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
       type: "",
       title: "",
       content: "",
+      isActive: true,
+    },
+  });
+
+  // Feature card form
+  const featureCardForm = useForm<z.infer<typeof featureCardFormSchema>>({
+    resolver: zodResolver(featureCardFormSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      iconName: "",
+      gradientFrom: "#3b82f6",
+      gradientTo: "#06b6d4",
+      borderColor: "#dbeafe",
+      sortOrder: 0,
+      isActive: true,
+    },
+  });
+
+  // Hero badge form
+  const heroBadgeForm = useForm<z.infer<typeof heroBadgeFormSchema>>({
+    resolver: zodResolver(heroBadgeFormSchema),
+    defaultValues: {
+      text: "",
+      iconName: "",
+      iconColor: "#fbbf24",
+      sortOrder: 0,
       isActive: true,
     },
   });
@@ -431,6 +477,148 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
     },
   });
 
+  // Create feature card mutation
+  const createFeatureCardMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof featureCardFormSchema>) => {
+      const response = await apiRequest("POST", "/api/about-feature-cards", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/about-feature-cards"] });
+      toast({
+        title: "Success",
+        description: "Feature card created successfully",
+      });
+      setShowFeatureCardForm(false);
+      featureCardForm.reset();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to create feature card",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update feature card mutation
+  const updateFeatureCardMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: z.infer<typeof featureCardFormSchema> }) => {
+      const response = await apiRequest("PUT", `/api/about-feature-cards/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/about-feature-cards"] });
+      toast({
+        title: "Success",
+        description: "Feature card updated successfully",
+      });
+      setEditingFeatureCard(null);
+      setShowFeatureCardForm(false);
+      featureCardForm.reset();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update feature card",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete feature card mutation
+  const deleteFeatureCardMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/about-feature-cards/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/about-feature-cards"] });
+      toast({
+        title: "Success",
+        description: "Feature card deleted successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete feature card",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Create hero badge mutation
+  const createHeroBadgeMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof heroBadgeFormSchema>) => {
+      const response = await apiRequest("POST", "/api/hero-badges", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/hero-badges"] });
+      toast({
+        title: "Success",
+        description: "Hero badge created successfully",
+      });
+      setShowHeroBadgeForm(false);
+      heroBadgeForm.reset();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to create hero badge",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update hero badge mutation
+  const updateHeroBadgeMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: z.infer<typeof heroBadgeFormSchema> }) => {
+      const response = await apiRequest("PUT", `/api/hero-badges/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/hero-badges"] });
+      toast({
+        title: "Success",
+        description: "Hero badge updated successfully",
+      });
+      setEditingHeroBadge(null);
+      setShowHeroBadgeForm(false);
+      heroBadgeForm.reset();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update hero badge",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete hero badge mutation
+  const deleteHeroBadgeMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/hero-badges/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/hero-badges"] });
+      toast({
+        title: "Success",
+        description: "Hero badge deleted successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete hero badge",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onCompanySubmit = (data: z.infer<typeof companyFormSchema>) => {
     updateCompanyMutation.mutate(data);
   };
@@ -448,6 +636,22 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
       updateDocumentMutation.mutate({ id: editingDocument.id, data });
     } else {
       createDocumentMutation.mutate(data);
+    }
+  };
+
+  const onFeatureCardSubmit = (data: z.infer<typeof featureCardFormSchema>) => {
+    if (editingFeatureCard) {
+      updateFeatureCardMutation.mutate({ id: editingFeatureCard.id, data });
+    } else {
+      createFeatureCardMutation.mutate(data);
+    }
+  };
+
+  const onHeroBadgeSubmit = (data: z.infer<typeof heroBadgeFormSchema>) => {
+    if (editingHeroBadge) {
+      updateHeroBadgeMutation.mutate({ id: editingHeroBadge.id, data });
+    } else {
+      createHeroBadgeMutation.mutate(data);
     }
   };
 
@@ -517,6 +721,60 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
     setShowDocumentForm(true);
   };
 
+  const handleEditFeatureCard = (card: AboutFeatureCard) => {
+    setEditingFeatureCard(card);
+    featureCardForm.reset({
+      title: card.title,
+      description: card.description,
+      iconName: card.iconName,
+      gradientFrom: card.gradientFrom,
+      gradientTo: card.gradientTo,
+      borderColor: card.borderColor,
+      sortOrder: card.sortOrder,
+      isActive: card.isActive,
+    });
+    setShowFeatureCardForm(true);
+  };
+
+  const handleAddFeatureCard = () => {
+    setEditingFeatureCard(null);
+    featureCardForm.reset({
+      title: "",
+      description: "",
+      iconName: "",
+      gradientFrom: "#3b82f6",
+      gradientTo: "#06b6d4",
+      borderColor: "#dbeafe",
+      sortOrder: featureCards.length,
+      isActive: true,
+    });
+    setShowFeatureCardForm(true);
+  };
+
+  const handleEditHeroBadge = (badge: HeroBadge) => {
+    setEditingHeroBadge(badge);
+    heroBadgeForm.reset({
+      text: badge.text,
+      iconName: badge.iconName,
+      iconColor: badge.iconColor,
+      sortOrder: badge.sortOrder,
+      isActive: badge.isActive,
+    });
+    setShowHeroBadgeForm(true);
+  };
+
+  const handleAddHeroBadge = () => {
+    setEditingHeroBadge(null);
+    heroBadgeForm.reset({
+      text: "",
+      iconName: "",
+      iconColor: "#fbbf24",
+      sortOrder: heroBadges.length,
+      isActive: true,
+    });
+    setShowHeroBadgeForm(true);
+  };
+
   const handleTogglePlatform = (platform: Platform) => {
     setPlatformToToggle(platform);
     setShowToggleConfirm(true);
@@ -534,6 +792,8 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
   const navItems = [
     { id: "company" as AdminSection, label: "Company Info", icon: Building },
     { id: "platforms" as AdminSection, label: "Manage Platforms", icon: Grid3X3 },
+    { id: "feature-cards" as AdminSection, label: "Feature Cards", icon: LayoutGrid },
+    { id: "hero-badges" as AdminSection, label: "Hero Badges", icon: Tag },
     { id: "legal" as AdminSection, label: "Legal Documents", icon: FileText },
     { id: "media" as AdminSection, label: "Media Library", icon: Images },
     { id: "settings" as AdminSection, label: "Settings", icon: Settings },
@@ -1488,6 +1748,157 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
               </div>
             )}
 
+            {activeSection === "feature-cards" && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-lamplight-primary">About Section Feature Cards</h3>
+                  <Button
+                    onClick={handleAddFeatureCard}
+                    className="bg-lamplight-success hover:bg-emerald-600 text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Feature Card
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {featureCardsLoading ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lamplight-accent mx-auto"></div>
+                      <p className="text-slate-600 mt-2">Loading feature cards...</p>
+                    </div>
+                  ) : featureCards.length === 0 ? (
+                    <div className="text-center py-8">
+                      <LayoutGrid className="h-12 w-12 text-slate-400 mx-auto mb-2" />
+                      <p className="text-slate-600">No feature cards found</p>
+                    </div>
+                  ) : (
+                    featureCards.map((card) => (
+                      <Card key={card.id} className="bg-slate-50 border border-slate-200">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                              <div
+                                className="w-16 h-16 rounded-lg flex items-center justify-center"
+                                style={{
+                                  background: `linear-gradient(to bottom right, ${card.gradientFrom}, ${card.gradientTo})`
+                                }}
+                              >
+                                <span className="text-2xl text-white">{card.iconName.slice(0, 2)}</span>
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-lamplight-primary">{card.title}</h4>
+                                <p className="text-sm text-slate-600 line-clamp-1">{card.description}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge variant={card.isActive ? "default" : "secondary"}>
+                                    {card.isActive ? "Active" : "Inactive"}
+                                  </Badge>
+                                  <span className="text-xs text-slate-500">
+                                    Icon: {card.iconName}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditFeatureCard(card)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deleteFeatureCardMutation.mutate(card.id)}
+                                disabled={deleteFeatureCardMutation.isPending}
+                              >
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeSection === "hero-badges" && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-lamplight-primary">Hero Section Badges</h3>
+                  <Button
+                    onClick={handleAddHeroBadge}
+                    className="bg-lamplight-success hover:bg-emerald-600 text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Hero Badge
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {heroBadgesLoading ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lamplight-accent mx-auto"></div>
+                      <p className="text-slate-600 mt-2">Loading hero badges...</p>
+                    </div>
+                  ) : heroBadges.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Tag className="h-12 w-12 text-slate-400 mx-auto mb-2" />
+                      <p className="text-slate-600">No hero badges found</p>
+                    </div>
+                  ) : (
+                    heroBadges.map((badge) => (
+                      <Card key={badge.id} className="bg-slate-50 border border-slate-200">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                              <div className="w-16 h-16 bg-slate-200 rounded-lg flex items-center justify-center">
+                                <span
+                                  className="text-2xl"
+                                  style={{ color: badge.iconColor }}
+                                >
+                                  {badge.iconName.slice(0, 2)}
+                                </span>
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-lamplight-primary">{badge.text}</h4>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge variant={badge.isActive ? "default" : "secondary"}>
+                                    {badge.isActive ? "Active" : "Inactive"}
+                                  </Badge>
+                                  <span className="text-xs text-slate-500">
+                                    Icon: {badge.iconName}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditHeroBadge(badge)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deleteHeroBadgeMutation.mutate(badge.id)}
+                                disabled={deleteHeroBadgeMutation.isPending}
+                              >
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
             {activeSection === "legal" && (
               <div>
                 <div className="flex items-center justify-between mb-6">
@@ -2002,6 +2413,283 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                 >
                   <Save className="h-4 w-4 mr-2" />
                   {editingDocument ? "Update" : "Create"} Document
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Feature Card Form Dialog */}
+      <Dialog open={showFeatureCardForm} onOpenChange={setShowFeatureCardForm}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingFeatureCard ? "Edit Feature Card" : "Add Feature Card"}
+            </DialogTitle>
+          </DialogHeader>
+          <Form {...featureCardForm}>
+            <form onSubmit={featureCardForm.handleSubmit(onFeatureCardSubmit)} className="space-y-4">
+              <FormField
+                control={featureCardForm.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Card Title</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="e.g., Growth Focused" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={featureCardForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={3} placeholder="Describe this feature..." />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={featureCardForm.control}
+                name="iconName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Icon</FormLabel>
+                    <FormControl>
+                      <IconSelector
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Select an icon..."
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={featureCardForm.control}
+                  name="gradientFrom"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Gradient From Color</FormLabel>
+                      <FormControl>
+                        <div className="flex gap-2">
+                          <Input
+                            type="color"
+                            {...field}
+                            className="w-12 h-10 p-1 cursor-pointer"
+                          />
+                          <Input
+                            type="text"
+                            {...field}
+                            placeholder="#3b82f6"
+                            className="flex-1"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={featureCardForm.control}
+                  name="gradientTo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Gradient To Color</FormLabel>
+                      <FormControl>
+                        <div className="flex gap-2">
+                          <Input
+                            type="color"
+                            {...field}
+                            className="w-12 h-10 p-1 cursor-pointer"
+                          />
+                          <Input
+                            type="text"
+                            {...field}
+                            placeholder="#06b6d4"
+                            className="flex-1"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={featureCardForm.control}
+                name="borderColor"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Border Color</FormLabel>
+                    <FormControl>
+                      <div className="flex gap-2">
+                        <Input
+                          type="color"
+                          {...field}
+                          className="w-12 h-10 p-1 cursor-pointer"
+                        />
+                        <Input
+                          type="text"
+                          {...field}
+                          placeholder="#dbeafe"
+                          className="flex-1"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={featureCardForm.control}
+                name="isActive"
+                render={({ field }) => (
+                  <FormItem className="flex items-center space-x-2">
+                    <FormControl>
+                      <Switch
+                        checked={field.value || false}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel>Active (visible on website)</FormLabel>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowFeatureCardForm(false);
+                    setEditingFeatureCard(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-lamplight-accent hover:bg-blue-600 text-white"
+                  disabled={createFeatureCardMutation.isPending || updateFeatureCardMutation.isPending}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {editingFeatureCard ? "Update" : "Create"} Card
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Hero Badge Form Dialog */}
+      <Dialog open={showHeroBadgeForm} onOpenChange={setShowHeroBadgeForm}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>
+              {editingHeroBadge ? "Edit Hero Badge" : "Add Hero Badge"}
+            </DialogTitle>
+          </DialogHeader>
+          <Form {...heroBadgeForm}>
+            <form onSubmit={heroBadgeForm.handleSubmit(onHeroBadgeSubmit)} className="space-y-4">
+              <FormField
+                control={heroBadgeForm.control}
+                name="text"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Badge Text</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="e.g., Fast & Reliable" maxLength={30} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={heroBadgeForm.control}
+                name="iconName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Icon</FormLabel>
+                    <FormControl>
+                      <IconSelector
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Select an icon..."
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={heroBadgeForm.control}
+                name="iconColor"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Icon Color</FormLabel>
+                    <FormControl>
+                      <div className="flex gap-2">
+                        <Input
+                          type="color"
+                          {...field}
+                          className="w-12 h-10 p-1 cursor-pointer"
+                        />
+                        <Input
+                          type="text"
+                          {...field}
+                          placeholder="#fbbf24"
+                          className="flex-1"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={heroBadgeForm.control}
+                name="isActive"
+                render={({ field }) => (
+                  <FormItem className="flex items-center space-x-2">
+                    <FormControl>
+                      <Switch
+                        checked={field.value || false}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel>Active (visible on website)</FormLabel>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowHeroBadgeForm(false);
+                    setEditingHeroBadge(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-lamplight-accent hover:bg-blue-600 text-white"
+                  disabled={createHeroBadgeMutation.isPending || updateHeroBadgeMutation.isPending}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {editingHeroBadge ? "Update" : "Create"} Badge
                 </Button>
               </div>
             </form>
