@@ -57,6 +57,11 @@ const companyFormSchema = insertCompanySchema.extend({
   sloganFontWeight: z.string().nullable().transform(val => val ?? "400"),
   sloganColor: z.string().nullable().transform(val => val ?? "#64748b"),
   headerPaddingY: z.number().nullable().transform(val => val ?? 16),
+  heroBadge: z.string().nullable().transform(val => val ?? ""),
+  platformsTitle: z.string().nullable().transform(val => val ?? ""),
+  platformsDescription: z.string().nullable().transform(val => val ?? ""),
+  contactTitle: z.string().nullable().transform(val => val ?? ""),
+  contactDescription: z.string().nullable().transform(val => val ?? ""),
   contactEmail: z.string().nullable().transform(val => val ?? ""),
   siteTitle: z.string().nullable().transform(val => val ?? ""),
   maintenanceMode: z.boolean().nullable().transform(val => val ?? false),
@@ -132,10 +137,15 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
       sloganFontWeight: company?.sloganFontWeight ?? "400",
       sloganColor: company?.sloganColor ?? "#64748b",
       headerPaddingY: company?.headerPaddingY ?? 16,
+      heroBadge: company?.heroBadge ?? "",
       heroTitle: company?.heroTitle ?? "",
       heroDescription: company?.heroDescription ?? "",
       aboutTitle: company?.aboutTitle ?? "",
       aboutDescription: company?.aboutDescription ?? "",
+      platformsTitle: company?.platformsTitle ?? "",
+      platformsDescription: company?.platformsDescription ?? "",
+      contactTitle: company?.contactTitle ?? "",
+      contactDescription: company?.contactDescription ?? "",
       contactEmail: company?.contactEmail ?? "",
       siteTitle: company?.siteTitle ?? "",
       maintenanceMode: company?.maintenanceMode ?? false,
@@ -924,6 +934,20 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                     </div>
                     <FormField
                       control={companyForm.control}
+                      name="heroBadge"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Hero Badge Text (Optional)</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Next-Generation SaaS Solutions" />
+                          </FormControl>
+                          <p className="text-xs text-slate-500">Small badge text displayed above the hero title</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={companyForm.control}
                       name="heroTitle"
                       render={({ field }) => (
                         <FormItem>
@@ -974,6 +998,67 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                         </FormItem>
                       )}
                     />
+
+                    <div className="border-t pt-6 mt-6">
+                      <h4 className="text-lg font-medium text-slate-900 mb-4">Platforms Section</h4>
+                    </div>
+                    <FormField
+                      control={companyForm.control}
+                      name="platformsTitle"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Platforms Section Title (Optional)</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Our SaaS Platforms" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={companyForm.control}
+                      name="platformsDescription"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Platforms Section Description (Optional)</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Discover our platforms and services" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="border-t pt-6 mt-6">
+                      <h4 className="text-lg font-medium text-slate-900 mb-4">Contact Section</h4>
+                    </div>
+                    <FormField
+                      control={companyForm.control}
+                      name="contactTitle"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Contact Section Title (Optional)</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Get in Touch" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={companyForm.control}
+                      name="contactDescription"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Contact Section Description (Optional)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} rows={2} placeholder="e.g., Ready to transform your business? Our team is here to help." />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     <FormField
                       control={companyForm.control}
                       name="footerBlurb"

@@ -135,10 +135,10 @@ export default function Home() {
               <div className="inline-block">
                 <div className="text-sm font-semibold text-blue-600 mb-3 tracking-wide uppercase">Our Solutions</div>
                 <h2 className="text-4xl md:text-5xl font-bold text-lamplight-primary mb-6 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                  Our SaaS Platforms
+                  {company?.platformsTitle || "Our SaaS Platforms"}
                 </h2>
               </div>
-              <p className="text-xl text-slate-600 max-w-3xl mx-auto">Discover our platforms and services</p>
+              <p className="text-xl text-slate-600 max-w-3xl mx-auto">{company?.platformsDescription || "Discover our platforms and services"}</p>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -165,11 +165,11 @@ export default function Home() {
               <div className="inline-block">
                 <div className="text-sm font-semibold text-blue-400 mb-3 tracking-wide uppercase">Let's Connect</div>
                 <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-                  Get in Touch
+                  {company?.contactTitle || "Get in Touch"}
                 </h2>
               </div>
               <p className="text-xl text-blue-100 mb-12 leading-relaxed max-w-2xl mx-auto">
-                Ready to transform your business with our SaaS platforms? Our team is here to help you get started.
+                {company?.contactDescription || "Ready to transform your business with our SaaS platforms? Our team is here to help you get started."}
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
                 <Button 
