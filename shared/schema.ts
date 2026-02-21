@@ -20,6 +20,7 @@ export const companies = pgTable("companies", {
   headerPaddingY: integer("header_padding_y").default(16),
   heroBadge: text("hero_badge"),
   heroTitle: text("hero_title").notNull(),
+  heroTitleHighlight: text("hero_title_highlight"),
   heroDescription: text("hero_description").notNull(),
   aboutTitle: text("about_title").notNull(),
   aboutDescription: text("about_description").notNull(),

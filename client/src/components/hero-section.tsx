@@ -39,9 +39,12 @@ export default function HeroSection({ company }: HeroSectionProps) {
           )}
 
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-white via-blue-100 to-cyan-100 bg-clip-text text-transparent">
-              {company?.heroTitle || "Empowering Business Through Software Innovation"}
-            </span>
+            {company?.heroTitle || "Empowering Business Through"}{' '}
+            {company?.heroTitleHighlight && (
+              <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">
+                {company.heroTitleHighlight}
+              </span>
+            )}
           </h1>
           
           <p className="text-xl md:text-2xl mb-10 text-blue-100 max-w-4xl mx-auto leading-relaxed font-light">

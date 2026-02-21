@@ -58,6 +58,7 @@ const companyFormSchema = insertCompanySchema.extend({
   sloganColor: z.string().nullable().transform(val => val ?? "#64748b"),
   headerPaddingY: z.number().nullable().transform(val => val ?? 16),
   heroBadge: z.string().nullable().transform(val => val ?? ""),
+  heroTitleHighlight: z.string().nullable().transform(val => val ?? ""),
   platformsTitle: z.string().nullable().transform(val => val ?? ""),
   platformsDescription: z.string().nullable().transform(val => val ?? ""),
   contactTitle: z.string().nullable().transform(val => val ?? ""),
@@ -139,6 +140,7 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
       headerPaddingY: company?.headerPaddingY ?? 16,
       heroBadge: company?.heroBadge ?? "",
       heroTitle: company?.heroTitle ?? "",
+      heroTitleHighlight: company?.heroTitleHighlight ?? "",
       heroDescription: company?.heroDescription ?? "",
       aboutTitle: company?.aboutTitle ?? "",
       aboutDescription: company?.aboutDescription ?? "",
@@ -951,10 +953,25 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                       name="heroTitle"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Hero Title</FormLabel>
+                          <FormLabel>Hero Title (Main Part)</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input {...field} placeholder="e.g., Empowering Business Through" />
                           </FormControl>
+                          <p className="text-xs text-slate-500">The first part of your hero title (displayed in white)</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={companyForm.control}
+                      name="heroTitleHighlight"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Hero Title (Highlighted Part - Optional)</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Software Innovation" />
+                          </FormControl>
+                          <p className="text-xs text-slate-500">The highlighted part of your hero title (displayed with blue gradient)</p>
                           <FormMessage />
                         </FormItem>
                       )}
