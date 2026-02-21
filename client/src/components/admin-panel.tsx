@@ -31,11 +31,192 @@ import {
   Sparkles,
   FileText,
   LayoutGrid,
-  Tag
+  Tag,
+  Upload,
+  Copy,
+  Eye
 } from "lucide-react";
-import type { Company, Platform, LegalDocument, AboutFeatureCard, HeroBadge } from "@shared/schema";
+import type { Company, Platform, LegalDocument, AboutFeatureCard, HeroBadge, MediaFile } from "@shared/schema";
 import { insertCompanySchema, insertPlatformSchema, insertLegalDocumentSchema, insertAboutFeatureCardSchema, insertHeroBadgeSchema } from "@shared/schema";
 import { IconSelector } from "@/components/icon-selector";
+
+type MediaFileMeta = Omit<MediaFile, 'data'>;
+
+function MediaLibrarySection() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [deleteMediaId, setDeleteMediaId] = useState<number | null>(null);
+
+  const { data: mediaFiles = [], isLoading: mediaLoading } = useQuery<MediaFileMeta[]>({
+    queryKey: ["/api/media"],
+  });
+
+  const uploadMutation = useMutation({
+    mutationFn: async (fileData: { filename: string; mimeType: string; size: number; data: string; altText?: string }) => {
+      const res = await apiRequest("POST", "/api/media", fileData);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/media"] });
+      toast({ title: "Uploaded", description: "File uploaded successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to upload file", variant: "destructive" });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/media/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/media"] });
+      toast({ title: "Deleted", description: "File deleted successfully" });
+      setDeleteMediaId(null);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete file", variant: "destructive" });
+    },
+  });
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.size > 10 * 1024 * 1024) {
+        toast({ title: "Error", description: `${file.name} exceeds 10MB limit`, variant: "destructive" });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        uploadMutation.mutate({
+          filename: file.name,
+          mimeType: file.type,
+          size: file.size,
+          data: reader.result as string,
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = "";
+  };
+
+  const copyUrl = (id: number) => {
+    const url = `${window.location.origin}/api/media/${id}`;
+    navigator.clipboard.writeText(url);
+    toast({ title: "Copied", description: "URL copied to clipboard" });
+  };
+
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-xl font-semibold text-lamplight-primary">Media Library</h3>
+        <label>
+          <input
+            type="file"
+            accept="image/*,video/*,audio/*,.pdf,.svg"
+            multiple
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          <Button asChild className="bg-lamplight-success hover:bg-emerald-600 text-white cursor-pointer">
+            <span>
+              <Upload className="h-4 w-4 mr-2" />
+              {uploadMutation.isPending ? "Uploading..." : "Upload Media"}
+            </span>
+          </Button>
+        </label>
+      </div>
+
+      {mediaLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+        </div>
+      ) : mediaFiles.length === 0 ? (
+        <div className="text-center py-12 bg-slate-50 rounded-lg border-2 border-dashed border-slate-200">
+          <Images className="h-12 w-12 text-slate-400 mx-auto mb-3" />
+          <p className="text-slate-600 font-medium">No media files uploaded</p>
+          <p className="text-sm text-slate-500 mt-1">Upload images and files to use across your site</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {mediaFiles.map((file) => (
+            <Card key={file.id} className="overflow-hidden group">
+              <div className="aspect-square bg-slate-100 flex items-center justify-center relative">
+                {file.mimeType.startsWith("image/") ? (
+                  <img
+                    src={`/api/media/${file.id}`}
+                    alt={file.altText || file.filename}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <FileText className="h-12 w-12 text-slate-400" />
+                )}
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => copyUrl(file.id)}
+                    title="Copy URL"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => window.open(`/api/media/${file.id}`, "_blank")}
+                    title="View"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => setDeleteMediaId(file.id)}
+                    title="Delete"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <CardContent className="p-3">
+                <p className="text-sm font-medium truncate" title={file.filename}>{file.filename}</p>
+                <p className="text-xs text-slate-500">{formatSize(file.size)}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <AlertDialog open={deleteMediaId !== null} onOpenChange={() => setDeleteMediaId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Media File</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this file. Any places using this file's URL will show a broken image.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteMediaId && deleteMutation.mutate(deleteMediaId)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
 
 interface AdminPanelProps {
   company?: Company;
@@ -2211,21 +2392,7 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
             )}
 
             {activeSection === "media" && (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold text-lamplight-primary">Media Library</h3>
-                  <Button className="bg-lamplight-success hover:bg-emerald-600 text-white">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Upload Media
-                  </Button>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-slate-100 rounded-lg p-4 text-center">
-                    <Images className="h-12 w-12 text-slate-400 mx-auto mb-2" />
-                    <p className="text-sm text-slate-600">No media files</p>
-                  </div>
-                </div>
-              </div>
+              <MediaLibrarySection />
             )}
 
             {activeSection === "settings" && (

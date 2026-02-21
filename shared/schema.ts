@@ -112,6 +112,24 @@ export type AboutFeatureCard = typeof aboutFeatureCards.$inferSelect;
 export type InsertHeroBadge = z.infer<typeof insertHeroBadgeSchema>;
 export type HeroBadge = typeof heroBadges.$inferSelect;
 
+export const mediaFiles = pgTable("media_files", {
+  id: serial("id").primaryKey(),
+  filename: text("filename").notNull(),
+  mimeType: text("mime_type").notNull(),
+  size: integer("size").notNull(),
+  data: text("data").notNull(),
+  altText: text("alt_text"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertMediaFileSchema = createInsertSchema(mediaFiles).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertMediaFile = z.infer<typeof insertMediaFileSchema>;
+export type MediaFile = typeof mediaFiles.$inferSelect;
+
 export const adminUsers = pgTable("admin_users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),

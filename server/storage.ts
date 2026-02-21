@@ -5,18 +5,21 @@ import {
   legalDocuments,
   aboutFeatureCards,
   heroBadges,
+  mediaFiles,
   type Company,
   type Platform,
   type AdminUser,
   type LegalDocument,
   type AboutFeatureCard,
   type HeroBadge,
+  type MediaFile,
   type InsertCompany,
   type InsertPlatform,
   type InsertAdminUser,
   type InsertLegalDocument,
   type InsertAboutFeatureCard,
   type InsertHeroBadge,
+  type InsertMediaFile,
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
@@ -59,6 +62,12 @@ export interface IStorage {
   createHeroBadge(badge: InsertHeroBadge): Promise<HeroBadge>;
   updateHeroBadge(id: number, badge: Partial<InsertHeroBadge>): Promise<HeroBadge | undefined>;
   deleteHeroBadge(id: number): Promise<boolean>;
+
+  // Media file methods
+  getAllMediaFiles(): Promise<MediaFile[]>;
+  getMediaFile(id: number): Promise<MediaFile | undefined>;
+  createMediaFile(file: InsertMediaFile): Promise<MediaFile>;
+  deleteMediaFile(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -66,6 +75,7 @@ export class MemStorage implements IStorage {
   private companies: Map<number, Company>;
   private platforms: Map<number, Platform>;
   private legalDocuments: Map<number, LegalDocument>;
+  private mediaFiles: Map<number, MediaFile>;
   private aboutFeatureCards: Map<number, AboutFeatureCard>;
   private heroBadges: Map<number, HeroBadge>;
   private currentAdminUserId: number;
@@ -74,6 +84,7 @@ export class MemStorage implements IStorage {
   private currentLegalDocumentId: number;
   private currentAboutFeatureCardId: number;
   private currentHeroBadgeId: number;
+  private currentMediaFileId: number;
 
   constructor() {
     this.adminUsers = new Map();
@@ -88,6 +99,8 @@ export class MemStorage implements IStorage {
     this.currentLegalDocumentId = 1;
     this.currentAboutFeatureCardId = 1;
     this.currentHeroBadgeId = 1;
+    this.currentMediaFileId = 1;
+    this.mediaFiles = new Map();
 
     // Initialize with default company data
     this.initializeDefaultData();
@@ -129,6 +142,13 @@ export class MemStorage implements IStorage {
       platformsDescription: "Discover our platforms and services",
       contactTitle: "Get in Touch",
       contactDescription: "Ready to transform your business with our SaaS platforms? Our team is here to help you get started.",
+      heroBackgroundImage: null,
+      heroBackgroundImageOpacity: 50,
+      heroSideImage: null,
+      aboutSectionLabel: "Why Choose Us",
+      aboutCardsLayout: "3-col",
+      platformsSectionLabel: "Our Solutions",
+      contactSectionLabel: "Let's Connect",
       contactButtonText: "Contact Us",
       contactEmail: "contact@lamplighttech.com",
       siteTitle: "Lamplight Technology",
@@ -655,6 +675,28 @@ This Support Policy may be updated to reflect changes in our services or support
       sloganFontWeight: insertCompany.sloganFontWeight ?? "400",
       sloganColor: insertCompany.sloganColor ?? "#64748b",
       headerPaddingY: insertCompany.headerPaddingY ?? 16,
+      heroBadge: insertCompany.heroBadge ?? null,
+      heroTitleHighlight: insertCompany.heroTitleHighlight ?? null,
+      heroButtonPrimary: insertCompany.heroButtonPrimary ?? "Explore Our Platforms",
+      heroButtonSecondary: insertCompany.heroButtonSecondary ?? "Learn More",
+      heroBackgroundGradientFrom: insertCompany.heroBackgroundGradientFrom ?? "#0f172a",
+      heroBackgroundGradientVia: insertCompany.heroBackgroundGradientVia ?? "#1e3a8a",
+      heroBackgroundGradientTo: insertCompany.heroBackgroundGradientTo ?? "#312e81",
+      heroBlobColor1: insertCompany.heroBlobColor1 ?? "#3b82f6",
+      heroBlobColor2: insertCompany.heroBlobColor2 ?? "#a855f7",
+      heroBlobColor3: insertCompany.heroBlobColor3 ?? "#6366f1",
+      heroBackgroundImage: insertCompany.heroBackgroundImage ?? null,
+      heroBackgroundImageOpacity: insertCompany.heroBackgroundImageOpacity ?? 50,
+      heroSideImage: insertCompany.heroSideImage ?? null,
+      aboutSectionLabel: insertCompany.aboutSectionLabel ?? "Why Choose Us",
+      aboutCardsLayout: insertCompany.aboutCardsLayout ?? "3-col",
+      platformsSectionLabel: insertCompany.platformsSectionLabel ?? "Our Solutions",
+      contactSectionLabel: insertCompany.contactSectionLabel ?? "Let's Connect",
+      platformsTitle: insertCompany.platformsTitle ?? null,
+      platformsDescription: insertCompany.platformsDescription ?? null,
+      contactTitle: insertCompany.contactTitle ?? null,
+      contactDescription: insertCompany.contactDescription ?? null,
+      contactButtonText: insertCompany.contactButtonText ?? "Contact Us",
       contactEmail: insertCompany.contactEmail ?? null,
       siteTitle: insertCompany.siteTitle ?? null,
       maintenanceMode: insertCompany.maintenanceMode ?? null,
@@ -825,6 +867,35 @@ This Support Policy may be updated to reflect changes in our services or support
 
   async deleteHeroBadge(id: number): Promise<boolean> {
     return this.heroBadges.delete(id);
+  }
+
+  // Media File methods
+  async getAllMediaFiles(): Promise<MediaFile[]> {
+    return Array.from(this.mediaFiles.values()).sort((a, b) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bTime - aTime;
+    });
+  }
+
+  async getMediaFile(id: number): Promise<MediaFile | undefined> {
+    return this.mediaFiles.get(id);
+  }
+
+  async createMediaFile(insertFile: InsertMediaFile): Promise<MediaFile> {
+    const id = this.currentMediaFileId++;
+    const file: MediaFile = {
+      ...insertFile,
+      id,
+      altText: insertFile.altText ?? null,
+      createdAt: new Date(),
+    };
+    this.mediaFiles.set(id, file);
+    return file;
+  }
+
+  async deleteMediaFile(id: number): Promise<boolean> {
+    return this.mediaFiles.delete(id);
   }
 }
 
@@ -1386,6 +1457,26 @@ This Support Policy may be updated to reflect changes in our services or support
 
   async deleteHeroBadge(id: number): Promise<boolean> {
     const result = await this.db.delete(heroBadges).where(eq(heroBadges.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Media File methods
+  async getAllMediaFiles(): Promise<MediaFile[]> {
+    return await this.db.select().from(mediaFiles).orderBy(mediaFiles.id);
+  }
+
+  async getMediaFile(id: number): Promise<MediaFile | undefined> {
+    const result = await this.db.select().from(mediaFiles).where(eq(mediaFiles.id, id));
+    return result[0];
+  }
+
+  async createMediaFile(insertFile: InsertMediaFile): Promise<MediaFile> {
+    const result = await this.db.insert(mediaFiles).values(insertFile).returning();
+    return result[0];
+  }
+
+  async deleteMediaFile(id: number): Promise<boolean> {
+    const result = await this.db.delete(mediaFiles).where(eq(mediaFiles.id, id)).returning();
     return result.length > 0;
   }
 }

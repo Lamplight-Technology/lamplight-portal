@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertCompanySchema, insertPlatformSchema, insertLegalDocumentSchema, insertAboutFeatureCardSchema, insertHeroBadgeSchema } from "@shared/schema";
+import { insertCompanySchema, insertPlatformSchema, insertLegalDocumentSchema, insertAboutFeatureCardSchema, insertHeroBadgeSchema, insertMediaFileSchema } from "@shared/schema";
 import { z } from "zod";
 import OpenAI from "openai";
 import * as cheerio from "cheerio";
@@ -773,6 +773,64 @@ Be concise and professional.`
       res.json({ message: "Hero badge deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete hero badge" });
+    }
+  });
+
+  // ============ Media File Routes ============
+
+  app.get("/api/media", requiresAdmin(), async (_req, res) => {
+    try {
+      const files = await storage.getAllMediaFiles();
+      const filesWithoutData = files.map(({ data, ...rest }) => rest);
+      res.json(filesWithoutData);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch media files" });
+    }
+  });
+
+  app.get("/api/media/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const file = await storage.getMediaFile(id);
+      if (!file) {
+        return res.status(404).json({ message: "Media file not found" });
+      }
+      const buffer = Buffer.from(file.data.split(",")[1] || file.data, "base64");
+      res.setHeader("Content-Type", file.mimeType);
+      res.setHeader("Cache-Control", "public, max-age=31536000");
+      res.send(buffer);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch media file" });
+    }
+  });
+
+  app.post("/api/media", requiresAdmin(), async (req, res) => {
+    try {
+      const { filename, mimeType, size, data, altText } = req.body;
+      if (!filename || !mimeType || !size || !data) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      if (size > 10 * 1024 * 1024) {
+        return res.status(400).json({ message: "File too large (max 10MB)" });
+      }
+      const file = await storage.createMediaFile({ filename, mimeType, size, data, altText: altText || null });
+      const { data: _, ...fileWithoutData } = file;
+      res.status(201).json(fileWithoutData);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to upload media file" });
+    }
+  });
+
+  app.delete("/api/media/:id", requiresAdmin(), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteMediaFile(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Media file not found" });
+      }
+      res.json({ message: "Media file deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete media file" });
     }
   });
 
