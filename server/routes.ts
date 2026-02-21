@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertCompanySchema, insertPlatformSchema, insertLegalDocumentSchema } from "@shared/schema";
+import { insertCompanySchema, insertPlatformSchema, insertLegalDocumentSchema, insertAboutFeatureCardSchema, insertHeroBadgeSchema } from "@shared/schema";
 import { z } from "zod";
 import OpenAI from "openai";
 import * as cheerio from "cheerio";
@@ -647,14 +647,132 @@ Be concise and professional.`
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteLegalDocument(id);
-      
+
       if (!deleted) {
         return res.status(404).json({ message: "Document not found" });
       }
-      
+
       res.json({ message: "Document deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete document" });
+    }
+  });
+
+  // About Feature Card endpoints
+  app.get("/api/about-feature-cards", async (req, res) => {
+    try {
+      const company = await storage.getCompany();
+      const companyId = company?.id || 1;
+      const cards = await storage.getAboutFeatureCards(companyId);
+      res.json(cards);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch feature cards" });
+    }
+  });
+
+  app.post("/api/about-feature-cards", requiresAdmin(), async (req, res) => {
+    try {
+      const validatedData = insertAboutFeatureCardSchema.parse(req.body);
+      const card = await storage.createAboutFeatureCard(validatedData);
+      res.status(201).json(card);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create feature card" });
+    }
+  });
+
+  app.put("/api/about-feature-cards/:id", requiresAdmin(), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertAboutFeatureCardSchema.partial().parse(req.body);
+      const card = await storage.updateAboutFeatureCard(id, validatedData);
+
+      if (!card) {
+        return res.status(404).json({ message: "Feature card not found" });
+      }
+
+      res.json(card);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update feature card" });
+    }
+  });
+
+  app.delete("/api/about-feature-cards/:id", requiresAdmin(), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteAboutFeatureCard(id);
+
+      if (!deleted) {
+        return res.status(404).json({ message: "Feature card not found" });
+      }
+
+      res.json({ message: "Feature card deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete feature card" });
+    }
+  });
+
+  // Hero Badge endpoints
+  app.get("/api/hero-badges", async (req, res) => {
+    try {
+      const company = await storage.getCompany();
+      const companyId = company?.id || 1;
+      const badges = await storage.getHeroBadges(companyId);
+      res.json(badges);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch hero badges" });
+    }
+  });
+
+  app.post("/api/hero-badges", requiresAdmin(), async (req, res) => {
+    try {
+      const validatedData = insertHeroBadgeSchema.parse(req.body);
+      const badge = await storage.createHeroBadge(validatedData);
+      res.status(201).json(badge);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create hero badge" });
+    }
+  });
+
+  app.put("/api/hero-badges/:id", requiresAdmin(), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertHeroBadgeSchema.partial().parse(req.body);
+      const badge = await storage.updateHeroBadge(id, validatedData);
+
+      if (!badge) {
+        return res.status(404).json({ message: "Hero badge not found" });
+      }
+
+      res.json(badge);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update hero badge" });
+    }
+  });
+
+  app.delete("/api/hero-badges/:id", requiresAdmin(), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteHeroBadge(id);
+
+      if (!deleted) {
+        return res.status(404).json({ message: "Hero badge not found" });
+      }
+
+      res.json({ message: "Hero badge deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete hero badge" });
     }
   });
 

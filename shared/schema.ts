@@ -22,12 +22,21 @@ export const companies = pgTable("companies", {
   heroTitle: text("hero_title").notNull(),
   heroTitleHighlight: text("hero_title_highlight"),
   heroDescription: text("hero_description").notNull(),
+  heroButtonPrimary: text("hero_button_primary").default("Explore Our Platforms"),
+  heroButtonSecondary: text("hero_button_secondary").default("Learn More"),
+  heroBackgroundGradientFrom: text("hero_background_gradient_from").default("#0f172a"),
+  heroBackgroundGradientVia: text("hero_background_gradient_via").default("#1e3a8a"),
+  heroBackgroundGradientTo: text("hero_background_gradient_to").default("#312e81"),
+  heroBlobColor1: text("hero_blob_color1").default("#3b82f6"),
+  heroBlobColor2: text("hero_blob_color2").default("#a855f7"),
+  heroBlobColor3: text("hero_blob_color3").default("#6366f1"),
   aboutTitle: text("about_title").notNull(),
   aboutDescription: text("about_description").notNull(),
   platformsTitle: text("platforms_title"),
   platformsDescription: text("platforms_description"),
   contactTitle: text("contact_title"),
   contactDescription: text("contact_description"),
+  contactButtonText: text("contact_button_text").default("Contact Us"),
   contactEmail: text("contact_email"),
   siteTitle: text("site_title"),
   maintenanceMode: boolean("maintenance_mode").default(false),
@@ -35,6 +44,29 @@ export const companies = pgTable("companies", {
   showPlatforms: boolean("show_platforms").default(true),
   showAbout: boolean("show_about").default(true),
   showContact: boolean("show_contact").default(true),
+});
+
+export const aboutFeatureCards = pgTable("about_feature_cards", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").references(() => companies.id).notNull().default(1),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  iconName: text("icon_name").notNull(),
+  gradientFrom: text("gradient_from").notNull().default("#3b82f6"),
+  gradientTo: text("gradient_to").notNull().default("#06b6d4"),
+  borderColor: text("border_color").notNull().default("#dbeafe"),
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+});
+
+export const heroBadges = pgTable("hero_badges", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").references(() => companies.id).notNull().default(1),
+  text: text("text").notNull(),
+  iconName: text("icon_name").notNull(),
+  iconColor: text("icon_color").notNull().default("#fbbf24"),
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
 });
 
 export const platforms = pgTable("platforms", {
@@ -56,10 +88,22 @@ export const insertPlatformSchema = createInsertSchema(platforms).omit({
   id: true,
 });
 
+export const insertAboutFeatureCardSchema = createInsertSchema(aboutFeatureCards).omit({
+  id: true,
+});
+
+export const insertHeroBadgeSchema = createInsertSchema(heroBadges).omit({
+  id: true,
+});
+
 export type InsertCompany = z.infer<typeof insertCompanySchema>;
 export type Company = typeof companies.$inferSelect;
 export type InsertPlatform = z.infer<typeof insertPlatformSchema>;
 export type Platform = typeof platforms.$inferSelect;
+export type InsertAboutFeatureCard = z.infer<typeof insertAboutFeatureCardSchema>;
+export type AboutFeatureCard = typeof aboutFeatureCards.$inferSelect;
+export type InsertHeroBadge = z.infer<typeof insertHeroBadgeSchema>;
+export type HeroBadge = typeof heroBadges.$inferSelect;
 
 export const adminUsers = pgTable("admin_users", {
   id: serial("id").primaryKey(),

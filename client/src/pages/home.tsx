@@ -9,8 +9,9 @@ import AccessDenied from "@/components/access-denied";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import * as Icons from "lucide-react";
 import { ChartLine, Shield, Users } from "lucide-react";
-import type { Company, Platform } from "@shared/schema";
+import type { Company, Platform, AboutFeatureCard, HeroBadge } from "@shared/schema";
 
 export default function Home() {
   const [showAdmin, setShowAdmin] = useState(false);
@@ -21,6 +22,10 @@ export default function Home() {
 
   const { data: platforms = [], isLoading: platformsLoading } = useQuery<Platform[]>({
     queryKey: ["/api/platforms"],
+  });
+
+  const { data: featureCards = [], isLoading: featureCardsLoading } = useQuery<AboutFeatureCard[]>({
+    queryKey: ["/api/about-feature-cards"],
   });
 
   const { data: authData, isLoading: authLoading } = useQuery<{ user: any | null }>({
@@ -86,38 +91,39 @@ export default function Home() {
             </div>
             
             <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
-              <div className="group relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-2xl transform group-hover:scale-105 transition-transform duration-300"></div>
-                <div className="relative bg-white/60 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100">
-                  <div className="bg-gradient-to-br from-blue-500 to-cyan-500 w-14 h-14 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-blue-500/30">
-                    <ChartLine className="h-7 w-7 text-white" />
+              {featureCards.filter(card => card.isActive).map((card) => {
+                const IconComponent = Icons[card.iconName as keyof typeof Icons] || Icons.HelpCircle;
+                return (
+                  <div key={card.id} className="group relative">
+                    <div
+                      className="absolute inset-0 rounded-2xl transform group-hover:scale-105 transition-transform duration-300"
+                      style={{
+                        background: `linear-gradient(to bottom right, ${card.gradientFrom}20, ${card.gradientTo}20)`
+                      }}
+                    ></div>
+                    <div
+                      className="relative bg-white/60 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border"
+                      style={{ borderColor: card.borderColor }}
+                    >
+                      <div
+                        className="w-14 h-14 rounded-xl flex items-center justify-center mb-5 shadow-lg"
+                        style={{
+                          background: `linear-gradient(to bottom right, ${card.gradientFrom}, ${card.gradientTo})`,
+                          boxShadow: `0 10px 15px -3px ${card.gradientFrom}30`
+                        }}
+                      >
+                        <IconComponent className="h-7 w-7 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-lamplight-primary mb-3">
+                        {card.title}
+                      </h3>
+                      <p className="text-slate-600 leading-relaxed">
+                        {card.description}
+                      </p>
+                    </div>
                   </div>
-                  <h3 className="text-2xl font-bold text-lamplight-primary mb-3">Growth Focused</h3>
-                  <p className="text-slate-600 leading-relaxed">Accelerating business growth through innovative technology solutions</p>
-                </div>
-              </div>
-              
-              <div className="group relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl transform group-hover:scale-105 transition-transform duration-300"></div>
-                <div className="relative bg-white/60 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-green-100">
-                  <div className="bg-gradient-to-br from-green-500 to-emerald-500 w-14 h-14 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-green-500/30">
-                    <Shield className="h-7 w-7 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-lamplight-primary mb-3">Enterprise Security</h3>
-                  <p className="text-slate-600 leading-relaxed">Bank-level security and compliance across all our platforms</p>
-                </div>
-              </div>
-              
-              <div className="group relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-2xl transform group-hover:scale-105 transition-transform duration-300"></div>
-                <div className="relative bg-white/60 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-purple-100">
-                  <div className="bg-gradient-to-br from-purple-500 to-pink-500 w-14 h-14 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-purple-500/30">
-                    <Users className="h-7 w-7 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-lamplight-primary mb-3">Customer Success</h3>
-                  <p className="text-slate-600 leading-relaxed">Dedicated support and success teams for every platform</p>
-                </div>
-              </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -179,7 +185,7 @@ export default function Home() {
                   size="lg"
                 >
                   <a href={`mailto:${company?.contactEmail || 'info@example.com'}`}>
-                    Contact Us
+                    {company?.contactButtonText || "Contact Us"}
                   </a>
                 </Button>
               </div>

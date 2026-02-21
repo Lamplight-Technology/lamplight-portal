@@ -59,10 +59,19 @@ const companyFormSchema = insertCompanySchema.extend({
   headerPaddingY: z.number().nullable().transform(val => val ?? 16),
   heroBadge: z.string().nullable().transform(val => val ?? ""),
   heroTitleHighlight: z.string().nullable().transform(val => val ?? ""),
+  heroButtonPrimary: z.string().nullable().transform(val => val ?? "Explore Our Platforms"),
+  heroButtonSecondary: z.string().nullable().transform(val => val ?? "Learn More"),
+  heroBackgroundGradientFrom: z.string().nullable().transform(val => val ?? "#0f172a"),
+  heroBackgroundGradientVia: z.string().nullable().transform(val => val ?? "#1e3a8a"),
+  heroBackgroundGradientTo: z.string().nullable().transform(val => val ?? "#312e81"),
+  heroBlobColor1: z.string().nullable().transform(val => val ?? "#3b82f6"),
+  heroBlobColor2: z.string().nullable().transform(val => val ?? "#a855f7"),
+  heroBlobColor3: z.string().nullable().transform(val => val ?? "#6366f1"),
   platformsTitle: z.string().nullable().transform(val => val ?? ""),
   platformsDescription: z.string().nullable().transform(val => val ?? ""),
   contactTitle: z.string().nullable().transform(val => val ?? ""),
   contactDescription: z.string().nullable().transform(val => val ?? ""),
+  contactButtonText: z.string().nullable().transform(val => val ?? "Contact Us"),
   contactEmail: z.string().nullable().transform(val => val ?? ""),
   siteTitle: z.string().nullable().transform(val => val ?? ""),
   maintenanceMode: z.boolean().nullable().transform(val => val ?? false),
@@ -142,12 +151,21 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
       heroTitle: company?.heroTitle ?? "",
       heroTitleHighlight: company?.heroTitleHighlight ?? "",
       heroDescription: company?.heroDescription ?? "",
+      heroButtonPrimary: company?.heroButtonPrimary ?? "Explore Our Platforms",
+      heroButtonSecondary: company?.heroButtonSecondary ?? "Learn More",
+      heroBackgroundGradientFrom: company?.heroBackgroundGradientFrom ?? "#0f172a",
+      heroBackgroundGradientVia: company?.heroBackgroundGradientVia ?? "#1e3a8a",
+      heroBackgroundGradientTo: company?.heroBackgroundGradientTo ?? "#312e81",
+      heroBlobColor1: company?.heroBlobColor1 ?? "#3b82f6",
+      heroBlobColor2: company?.heroBlobColor2 ?? "#a855f7",
+      heroBlobColor3: company?.heroBlobColor3 ?? "#6366f1",
       aboutTitle: company?.aboutTitle ?? "",
       aboutDescription: company?.aboutDescription ?? "",
       platformsTitle: company?.platformsTitle ?? "",
       platformsDescription: company?.platformsDescription ?? "",
       contactTitle: company?.contactTitle ?? "",
       contactDescription: company?.contactDescription ?? "",
+      contactButtonText: company?.contactButtonText ?? "Contact Us",
       contactEmail: company?.contactEmail ?? "",
       siteTitle: company?.siteTitle ?? "",
       maintenanceMode: company?.maintenanceMode ?? false,
@@ -989,6 +1007,207 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                         </FormItem>
                       )}
                     />
+
+                    <div className="border-t pt-6 mt-6">
+                      <h4 className="text-lg font-medium text-slate-900 mb-4">Hero Buttons</h4>
+                    </div>
+                    <FormField
+                      control={companyForm.control}
+                      name="heroButtonPrimary"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Primary Button Text</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Explore Our Platforms" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={companyForm.control}
+                      name="heroButtonSecondary"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Secondary Button Text</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Learn More" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="border-t pt-6 mt-6">
+                      <h4 className="text-lg font-medium text-slate-900 mb-4">Hero Background Colors</h4>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4">
+                      <FormField
+                        control={companyForm.control}
+                        name="heroBackgroundGradientFrom"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Gradient From</FormLabel>
+                            <FormControl>
+                              <div className="flex gap-2">
+                                <Input
+                                  type="color"
+                                  {...field}
+                                  value={field.value ?? "#0f172a"}
+                                  className="w-12 h-10 p-1 cursor-pointer"
+                                />
+                                <Input
+                                  type="text"
+                                  {...field}
+                                  value={field.value ?? "#0f172a"}
+                                  placeholder="#0f172a"
+                                  className="flex-1"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={companyForm.control}
+                        name="heroBackgroundGradientVia"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Gradient Via</FormLabel>
+                            <FormControl>
+                              <div className="flex gap-2">
+                                <Input
+                                  type="color"
+                                  {...field}
+                                  value={field.value ?? "#1e3a8a"}
+                                  className="w-12 h-10 p-1 cursor-pointer"
+                                />
+                                <Input
+                                  type="text"
+                                  {...field}
+                                  value={field.value ?? "#1e3a8a"}
+                                  placeholder="#1e3a8a"
+                                  className="flex-1"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={companyForm.control}
+                        name="heroBackgroundGradientTo"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Gradient To</FormLabel>
+                            <FormControl>
+                              <div className="flex gap-2">
+                                <Input
+                                  type="color"
+                                  {...field}
+                                  value={field.value ?? "#312e81"}
+                                  className="w-12 h-10 p-1 cursor-pointer"
+                                />
+                                <Input
+                                  type="text"
+                                  {...field}
+                                  value={field.value ?? "#312e81"}
+                                  placeholder="#312e81"
+                                  className="flex-1"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 mt-4">
+                      <FormField
+                        control={companyForm.control}
+                        name="heroBlobColor1"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Blob Color 1</FormLabel>
+                            <FormControl>
+                              <div className="flex gap-2">
+                                <Input
+                                  type="color"
+                                  {...field}
+                                  value={field.value ?? "#3b82f6"}
+                                  className="w-12 h-10 p-1 cursor-pointer"
+                                />
+                                <Input
+                                  type="text"
+                                  {...field}
+                                  value={field.value ?? "#3b82f6"}
+                                  placeholder="#3b82f6"
+                                  className="flex-1"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={companyForm.control}
+                        name="heroBlobColor2"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Blob Color 2</FormLabel>
+                            <FormControl>
+                              <div className="flex gap-2">
+                                <Input
+                                  type="color"
+                                  {...field}
+                                  value={field.value ?? "#a855f7"}
+                                  className="w-12 h-10 p-1 cursor-pointer"
+                                />
+                                <Input
+                                  type="text"
+                                  {...field}
+                                  value={field.value ?? "#a855f7"}
+                                  placeholder="#a855f7"
+                                  className="flex-1"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={companyForm.control}
+                        name="heroBlobColor3"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Blob Color 3</FormLabel>
+                            <FormControl>
+                              <div className="flex gap-2">
+                                <Input
+                                  type="color"
+                                  {...field}
+                                  value={field.value ?? "#6366f1"}
+                                  className="w-12 h-10 p-1 cursor-pointer"
+                                />
+                                <Input
+                                  type="text"
+                                  {...field}
+                                  value={field.value ?? "#6366f1"}
+                                  placeholder="#6366f1"
+                                  className="flex-1"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
                     <FormField
                       control={companyForm.control}
                       name="aboutTitle"
@@ -1070,6 +1289,19 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                           <FormLabel>Contact Section Description (Optional)</FormLabel>
                           <FormControl>
                             <Textarea {...field} rows={2} placeholder="e.g., Ready to transform your business? Our team is here to help." />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={companyForm.control}
+                      name="contactButtonText"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Contact Button Text</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Contact Us" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

@@ -1,12 +1,19 @@
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import * as Icons from "lucide-react";
 import { Rocket, Info, Sparkles, Zap } from "lucide-react";
-import type { Company } from "@shared/schema";
+import type { Company, HeroBadge } from "@shared/schema";
+import React from "react";
 
 interface HeroSectionProps {
   company?: Company;
 }
 
 export default function HeroSection({ company }: HeroSectionProps) {
+  const { data: heroBadges = [] } = useQuery<HeroBadge[]>({
+    queryKey: ["/api/hero-badges"],
+  });
+
   const scrollToPlatforms = () => {
     const element = document.getElementById('platforms');
     if (element) {
@@ -22,12 +29,27 @@ export default function HeroSection({ company }: HeroSectionProps) {
   };
 
   return (
-    <section id="home" className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white py-24 md:py-32 overflow-hidden">
+    <section
+      id="home"
+      className="relative text-white py-24 md:py-32 overflow-hidden"
+      style={{
+        background: `linear-gradient(to bottom right, ${company?.heroBackgroundGradientFrom || '#0f172a'}, ${company?.heroBackgroundGradientVia || '#1e3a8a'}, ${company?.heroBackgroundGradientTo || '#312e81'})`
+      }}
+    >
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00em0wIDI4YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00ek0xMiAzMmMtMi4yMSAwLTQtMS43OS00LTRzMS43OS00IDQtNCA0IDEuNzkgNCA0LTEuNzkgNC00IDR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-40"></div>
-      
-      <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-      <div className="absolute top-40 right-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-      <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+
+      <div
+        className="absolute top-20 left-10 w-72 h-72 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"
+        style={{ backgroundColor: company?.heroBlobColor1 || '#3b82f6' }}
+      ></div>
+      <div
+        className="absolute top-40 right-10 w-72 h-72 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"
+        style={{ backgroundColor: company?.heroBlobColor2 || '#a855f7' }}
+      ></div>
+      <div
+        className="absolute -bottom-8 left-1/2 w-72 h-72 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"
+        style={{ backgroundColor: company?.heroBlobColor3 || '#6366f1' }}
+      ></div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center">
@@ -53,43 +75,44 @@ export default function HeroSection({ company }: HeroSectionProps) {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             {company?.showPlatforms !== false && (
-              <Button 
+              <Button
                 onClick={scrollToPlatforms}
                 className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-8 py-6 text-lg shadow-lg shadow-blue-500/50 hover:shadow-xl hover:shadow-blue-500/60 transition-all duration-300 group"
                 size="lg"
               >
                 <Rocket className="h-5 w-5 mr-2 group-hover:rotate-12 transition-transform" />
-                Explore Our Platforms
+                {company?.heroButtonPrimary || "Explore Our Platforms"}
               </Button>
             )}
             {company?.showAbout !== false && (
-              <Button 
+              <Button
                 onClick={scrollToAbout}
-                variant="outline" 
+                variant="outline"
                 className="border-2 border-blue-300/50 bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm px-8 py-6 text-lg transition-all duration-300 group"
                 size="lg"
               >
                 <Info className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
-                Learn More
+                {company?.heroButtonSecondary || "Learn More"}
               </Button>
             )}
           </div>
           
           <div className="mt-16 flex items-center justify-center gap-12 text-blue-200/80">
-            <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-yellow-400" />
-              <span className="text-sm">Fast & Reliable</span>
-            </div>
-            <div className="h-4 w-px bg-blue-400/30"></div>
-            <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-green-400" />
-              <span className="text-sm">Enterprise Security</span>
-            </div>
-            <div className="h-4 w-px bg-blue-400/30 hidden sm:block"></div>
-            <div className="hidden sm:flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-purple-400" />
-              <span className="text-sm">AI-Powered</span>
-            </div>
+            {heroBadges.filter(badge => badge.isActive).map((badge, index) => {
+              const IconComponent = Icons[badge.iconName as keyof typeof Icons] || Icons.HelpCircle;
+              return (
+                <React.Fragment key={badge.id}>
+                  {index > 0 && <div className="h-4 w-px bg-blue-400/30" />}
+                  <div className="flex items-center gap-2">
+                    <IconComponent
+                      className="h-5 w-5"
+                      style={{ color: badge.iconColor }}
+                    />
+                    <span className="text-sm">{badge.text}</span>
+                  </div>
+                </React.Fragment>
+              );
+            })}
           </div>
         </div>
       </div>
