@@ -80,7 +80,9 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center mb-16">
               <div className="inline-block">
-                <div className="text-sm font-semibold text-blue-600 mb-3 tracking-wide uppercase">Why Choose Us</div>
+                <div className="text-sm font-semibold text-blue-600 mb-3 tracking-wide uppercase">
+                  {company?.aboutSectionLabel || "Why Choose Us"}
+                </div>
                 <h2 className="text-4xl md:text-5xl font-bold text-lamplight-primary mb-6 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                   {company?.aboutTitle || "Building the Future of Software"}
                 </h2>
@@ -89,8 +91,12 @@ export default function Home() {
                 {company?.aboutDescription}
               </p>
             </div>
-            
-            <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+
+            <div className={`grid ${
+              company?.aboutCardsLayout === "2-col" ? "md:grid-cols-2" :
+              company?.aboutCardsLayout === "4-col" ? "md:grid-cols-2 lg:grid-cols-4" :
+              "md:grid-cols-3"
+            } gap-8 lg:gap-12`}>
               {featureCards.filter(card => card.isActive).map((card) => {
                 const IconComponent = Icons[card.iconName as keyof typeof Icons] || Icons.HelpCircle;
                 return (
@@ -139,7 +145,9 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <div className="inline-block">
-                <div className="text-sm font-semibold text-blue-600 mb-3 tracking-wide uppercase">Our Solutions</div>
+                <div className="text-sm font-semibold text-blue-600 mb-3 tracking-wide uppercase">
+                  {company?.platformsSectionLabel || "Our Solutions"}
+                </div>
                 <h2 className="text-4xl md:text-5xl font-bold text-lamplight-primary mb-6 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                   {company?.platformsTitle || "Our SaaS Platforms"}
                 </h2>
@@ -169,7 +177,9 @@ export default function Home() {
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center">
               <div className="inline-block">
-                <div className="text-sm font-semibold text-blue-400 mb-3 tracking-wide uppercase">Let's Connect</div>
+                <div className="text-sm font-semibold text-blue-400 mb-3 tracking-wide uppercase">
+                  {company?.contactSectionLabel || "Let's Connect"}
+                </div>
                 <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
                   {company?.contactTitle || "Get in Touch"}
                 </h2>

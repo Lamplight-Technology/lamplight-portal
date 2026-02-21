@@ -70,8 +70,15 @@ const companyFormSchema = insertCompanySchema.extend({
   heroBlobColor1: z.string().nullable().transform(val => val ?? "#3b82f6"),
   heroBlobColor2: z.string().nullable().transform(val => val ?? "#a855f7"),
   heroBlobColor3: z.string().nullable().transform(val => val ?? "#6366f1"),
+  heroBackgroundImage: z.string().nullable().transform(val => val ?? ""),
+  heroBackgroundImageOpacity: z.number().nullable().transform(val => val ?? 50),
+  heroSideImage: z.string().nullable().transform(val => val ?? ""),
+  aboutSectionLabel: z.string().nullable().transform(val => val ?? "Why Choose Us"),
+  aboutCardsLayout: z.string().nullable().transform(val => val ?? "3-col"),
+  platformsSectionLabel: z.string().nullable().transform(val => val ?? "Our Solutions"),
   platformsTitle: z.string().nullable().transform(val => val ?? ""),
   platformsDescription: z.string().nullable().transform(val => val ?? ""),
+  contactSectionLabel: z.string().nullable().transform(val => val ?? "Let's Connect"),
   contactTitle: z.string().nullable().transform(val => val ?? ""),
   contactDescription: z.string().nullable().transform(val => val ?? ""),
   contactButtonText: z.string().nullable().transform(val => val ?? "Contact Us"),
@@ -178,10 +185,17 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
       heroBlobColor1: company?.heroBlobColor1 ?? "#3b82f6",
       heroBlobColor2: company?.heroBlobColor2 ?? "#a855f7",
       heroBlobColor3: company?.heroBlobColor3 ?? "#6366f1",
+      heroBackgroundImage: company?.heroBackgroundImage ?? "",
+      heroBackgroundImageOpacity: company?.heroBackgroundImageOpacity ?? 50,
+      heroSideImage: company?.heroSideImage ?? "",
+      aboutSectionLabel: company?.aboutSectionLabel ?? "Why Choose Us",
       aboutTitle: company?.aboutTitle ?? "",
       aboutDescription: company?.aboutDescription ?? "",
+      aboutCardsLayout: company?.aboutCardsLayout ?? "3-col",
+      platformsSectionLabel: company?.platformsSectionLabel ?? "Our Solutions",
       platformsTitle: company?.platformsTitle ?? "",
       platformsDescription: company?.platformsDescription ?? "",
+      contactSectionLabel: company?.contactSectionLabel ?? "Let's Connect",
       contactTitle: company?.contactTitle ?? "",
       contactDescription: company?.contactDescription ?? "",
       contactButtonText: company?.contactButtonText ?? "Contact Us",
@@ -1299,7 +1313,99 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                     />
 
                     <div className="border-t pt-6 mt-6">
+                      <h4 className="text-lg font-medium text-slate-900 mb-4">Color Theme Presets</h4>
+                      <p className="text-sm text-slate-600 mb-4">Quickly apply predefined color schemes</p>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            companyForm.setValue("heroBackgroundGradientFrom", "#0f172a");
+                            companyForm.setValue("heroBackgroundGradientVia", "#1e3a8a");
+                            companyForm.setValue("heroBackgroundGradientTo", "#312e81");
+                            companyForm.setValue("heroBlobColor1", "#3b82f6");
+                            companyForm.setValue("heroBlobColor2", "#a855f7");
+                            companyForm.setValue("heroBlobColor3", "#6366f1");
+                          }}
+                          className="p-4 rounded-lg border-2 border-slate-200 hover:border-blue-500 transition-colors bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900"
+                        >
+                          <div className="text-white text-sm font-medium">Ocean Blue (Default)</div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            companyForm.setValue("heroBackgroundGradientFrom", "#1e1b4b");
+                            companyForm.setValue("heroBackgroundGradientVia", "#7c3aed");
+                            companyForm.setValue("heroBackgroundGradientTo", "#db2777");
+                            companyForm.setValue("heroBlobColor1", "#a855f7");
+                            companyForm.setValue("heroBlobColor2", "#ec4899");
+                            companyForm.setValue("heroBlobColor3", "#f43f5e");
+                          }}
+                          className="p-4 rounded-lg border-2 border-slate-200 hover:border-purple-500 transition-colors bg-gradient-to-br from-indigo-950 via-purple-600 to-pink-600"
+                        >
+                          <div className="text-white text-sm font-medium">Vibrant Purple</div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            companyForm.setValue("heroBackgroundGradientFrom", "#0f172a");
+                            companyForm.setValue("heroBackgroundGradientVia", "#047857");
+                            companyForm.setValue("heroBackgroundGradientTo", "#0d9488");
+                            companyForm.setValue("heroBlobColor1", "#10b981");
+                            companyForm.setValue("heroBlobColor2", "#14b8a6");
+                            companyForm.setValue("heroBlobColor3", "#06b6d4");
+                          }}
+                          className="p-4 rounded-lg border-2 border-slate-200 hover:border-emerald-500 transition-colors bg-gradient-to-br from-slate-900 via-emerald-700 to-teal-600"
+                        >
+                          <div className="text-white text-sm font-medium">Fresh Teal</div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            companyForm.setValue("heroBackgroundGradientFrom", "#18181b");
+                            companyForm.setValue("heroBackgroundGradientVia", "#27272a");
+                            companyForm.setValue("heroBackgroundGradientTo", "#3f3f46");
+                            companyForm.setValue("heroBlobColor1", "#71717a");
+                            companyForm.setValue("heroBlobColor2", "#a1a1aa");
+                            companyForm.setValue("heroBlobColor3", "#d4d4d8");
+                          }}
+                          className="p-4 rounded-lg border-2 border-slate-200 hover:border-slate-500 transition-colors bg-gradient-to-br from-zinc-950 via-zinc-800 to-zinc-700"
+                        >
+                          <div className="text-white text-sm font-medium">Modern Slate</div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            companyForm.setValue("heroBackgroundGradientFrom", "#7f1d1d");
+                            companyForm.setValue("heroBackgroundGradientVia", "#dc2626");
+                            companyForm.setValue("heroBackgroundGradientTo", "#f97316");
+                            companyForm.setValue("heroBlobColor1", "#ef4444");
+                            companyForm.setValue("heroBlobColor2", "#fb923c");
+                            companyForm.setValue("heroBlobColor3", "#fbbf24");
+                          }}
+                          className="p-4 rounded-lg border-2 border-slate-200 hover:border-red-500 transition-colors bg-gradient-to-br from-red-950 via-red-600 to-orange-500"
+                        >
+                          <div className="text-white text-sm font-medium">Sunset Orange</div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            companyForm.setValue("heroBackgroundGradientFrom", "#1e3a8a");
+                            companyForm.setValue("heroBackgroundGradientVia", "#0891b2");
+                            companyForm.setValue("heroBackgroundGradientTo", "#0e7490");
+                            companyForm.setValue("heroBlobColor1", "#0ea5e9");
+                            companyForm.setValue("heroBlobColor2", "#06b6d4");
+                            companyForm.setValue("heroBlobColor3", "#22d3ee");
+                          }}
+                          className="p-4 rounded-lg border-2 border-slate-200 hover:border-cyan-500 transition-colors bg-gradient-to-br from-blue-900 via-cyan-600 to-cyan-700"
+                        >
+                          <div className="text-white text-sm font-medium">Sky Blue</div>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-6 mt-6">
                       <h4 className="text-lg font-medium text-slate-900 mb-4">Hero Background Colors</h4>
+                      <p className="text-sm text-slate-600 mb-2">Customize individual colors (overrides presets)</p>
                     </div>
                     <div className="grid grid-cols-3 gap-4">
                       <FormField
@@ -1468,6 +1574,87 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                       />
                     </div>
 
+                    <div className="border-t pt-6 mt-6">
+                      <h4 className="text-lg font-medium text-slate-900 mb-4">Hero Images</h4>
+                      <p className="text-sm text-slate-600 mb-4">Add images to enhance your hero section</p>
+                    </div>
+                    <FormField
+                      control={companyForm.control}
+                      name="heroBackgroundImage"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Background Image URL (Optional)</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="https://example.com/hero-bg.jpg" />
+                          </FormControl>
+                          <p className="text-xs text-slate-500">Image will overlay on the gradient background</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={companyForm.control}
+                      name="heroBackgroundImageOpacity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Background Image Opacity ({field.value}%)</FormLabel>
+                          <FormControl>
+                            <div className="flex items-center gap-4">
+                              <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                value={field.value ?? 50}
+                                onChange={(e) => field.onChange(parseInt(e.target.value))}
+                                className="flex-1"
+                                aria-label="Background image opacity slider"
+                              />
+                              <Input
+                                type="number"
+                                {...field}
+                                min="0"
+                                max="100"
+                                className="w-20"
+                              />
+                            </div>
+                          </FormControl>
+                          <p className="text-xs text-slate-500">0 = fully transparent, 100 = fully opaque</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={companyForm.control}
+                      name="heroSideImage"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Hero Side Image URL (Optional)</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="https://example.com/hero-illustration.png" />
+                          </FormControl>
+                          <p className="text-xs text-slate-500">Image displayed alongside the hero text (right side on desktop)</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="border-t pt-6 mt-6">
+                      <h4 className="text-lg font-medium text-slate-900 mb-4">About Section</h4>
+                    </div>
+                    <FormField
+                      control={companyForm.control}
+                      name="aboutSectionLabel"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>About Section Label</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Why Choose Us" />
+                          </FormControl>
+                          <p className="text-xs text-slate-500">Small uppercase label above the about title</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <FormField
                       control={companyForm.control}
                       name="aboutTitle"
@@ -1494,10 +1681,47 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                         </FormItem>
                       )}
                     />
+                    <FormField
+                      control={companyForm.control}
+                      name="aboutCardsLayout"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Feature Cards Layout</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value ?? "3-col"}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select layout..." />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="2-col">2 Columns</SelectItem>
+                              <SelectItem value="3-col">3 Columns</SelectItem>
+                              <SelectItem value="4-col">4 Columns</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-slate-500">Grid layout for feature cards (responsive on mobile)</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                     <div className="border-t pt-6 mt-6">
                       <h4 className="text-lg font-medium text-slate-900 mb-4">Platforms Section</h4>
                     </div>
+                    <FormField
+                      control={companyForm.control}
+                      name="platformsSectionLabel"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Platforms Section Label</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Our Solutions" />
+                          </FormControl>
+                          <p className="text-xs text-slate-500">Small uppercase label above the platforms title</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <FormField
                       control={companyForm.control}
                       name="platformsTitle"
@@ -1528,6 +1752,20 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                     <div className="border-t pt-6 mt-6">
                       <h4 className="text-lg font-medium text-slate-900 mb-4">Contact Section</h4>
                     </div>
+                    <FormField
+                      control={companyForm.control}
+                      name="contactSectionLabel"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Contact Section Label</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Let's Connect" />
+                          </FormControl>
+                          <p className="text-xs text-slate-500">Small uppercase label above the contact title</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <FormField
                       control={companyForm.control}
                       name="contactTitle"
