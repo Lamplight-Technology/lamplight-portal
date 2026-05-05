@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Settings, Menu, LogIn, LogOut, User } from "lucide-react";
+import { Settings, Menu, LogIn, LogOut } from "lucide-react";
+import LoginModal from "@/components/login-modal";
 import type { Company } from "@shared/schema";
 
 interface NavigationProps {
@@ -12,25 +13,14 @@ interface NavigationProps {
 
 export default function Navigation({ onAdminClick, company, isAuthenticated = false, isAdmin = false }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
 
   const handleLogin = () => {
-    // Check if we're in an iframe (Replit workspace)
-    if (window.self !== window.top) {
-      // Open in new tab to avoid iframe restrictions
-      window.open('/api/login', '_blank');
-    } else {
-      window.location.href = '/api/login';
-    }
+    setLoginOpen(true);
   };
 
   const handleLogout = () => {
-    // Check if we're in an iframe (Replit workspace)
-    if (window.self !== window.top) {
-      // Open in new tab to avoid iframe restrictions
-      window.open('/api/logout', '_blank');
-    } else {
-      window.location.href = '/api/logout';
-    }
+    window.location.href = '/api/logout';
   };
 
   const scrollToSection = (sectionId: string) => {
@@ -243,6 +233,7 @@ export default function Navigation({ onAdminClick, company, isAuthenticated = fa
           </div>
         )}
       </div>
+      <LoginModal open={loginOpen} onOpenChange={setLoginOpen} redirect="/admin" />
     </nav>
   );
 }

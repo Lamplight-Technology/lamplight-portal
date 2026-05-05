@@ -1,11 +1,14 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import AdminPanel from "@/components/admin-panel";
 import AccessDenied from "@/components/access-denied";
+import LoginModal from "@/components/login-modal";
 import type { Company, Platform } from "@shared/schema";
 
 export default function AdminPage() {
   const [, setLocation] = useLocation();
+  const [loginOpen, setLoginOpen] = useState(false);
 
   const { data: authData, isLoading: authLoading } = useQuery<{ user: any | null }>({
     queryKey: ["/api/user"],
@@ -45,18 +48,13 @@ export default function AdminPage() {
           <h2 className="text-2xl font-bold text-slate-900 mb-4">Authentication Required</h2>
           <p className="text-slate-600 mb-6">You must be logged in to access the admin panel.</p>
           <button
-            onClick={() => {
-              if (window.self !== window.top) {
-                window.open('/api/login', '_blank');
-              } else {
-                window.location.href = '/api/login';
-              }
-            }}
+            onClick={() => setLoginOpen(true)}
             className="bg-lamplight-accent hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium"
           >
             Login
           </button>
         </div>
+        <LoginModal open={loginOpen} onOpenChange={setLoginOpen} redirect="/admin" />
       </div>
     );
   }

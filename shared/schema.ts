@@ -133,7 +133,7 @@ export type MediaFile = typeof mediaFiles.$inferSelect;
 export const adminUsers = pgTable("admin_users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
-  auth0Sub: text("auth0_sub"),
+  stytchUserId: text("stytch_user_id"),
   name: text("name"),
   createdAt: timestamp("created_at").defaultNow(),
 });

@@ -1,4 +1,4 @@
-import type { Express, Request, Response, NextFunction } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertCompanySchema, insertPlatformSchema, insertLegalDocumentSchema, insertAboutFeatureCardSchema, insertHeroBadgeSchema, insertMediaFileSchema } from "@shared/schema";
@@ -6,52 +6,7 @@ import { z } from "zod";
 import OpenAI from "openai";
 import * as cheerio from "cheerio";
 import { promises as dns } from "dns";
-
-const requiresAuth = () => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.oidc?.isAuthenticated()) {
-      return res.status(401).json({ message: "Authentication required" });
-    }
-    next();
-  };
-};
-
-const requiresAdmin = () => {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.oidc?.isAuthenticated()) {
-      return res.status(401).json({ message: "Authentication required" });
-    }
-
-    const user = req.oidc.user;
-    const email = user?.email;
-    const auth0Sub = user?.sub;
-
-    if (!email && !auth0Sub) {
-      return res.status(403).json({ message: "Admin access denied: no user identifier found" });
-    }
-
-    try {
-      let adminUser;
-      
-      if (email) {
-        adminUser = await storage.getAdminUserByEmail(email);
-      }
-      
-      if (!adminUser && auth0Sub) {
-        adminUser = await storage.getAdminUserByAuth0Sub(auth0Sub);
-      }
-
-      if (!adminUser) {
-        return res.status(403).json({ message: "Admin access denied" });
-      }
-
-      next();
-    } catch (error) {
-      console.error("Error checking admin status:", error);
-      return res.status(500).json({ message: "Error verifying admin access" });
-    }
-  };
-};
+import { requireAuth as requiresAuth, requireAdmin as requiresAdmin } from "./auth";
 
 const isPrivateOrLocalIP = (ip: string): boolean => {
   if (ip === 'localhost') return true;
@@ -162,8 +117,9 @@ const fetchPlaceholderImage = async (category: string, name?: string): Promise<s
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get("/api/user", (req: Request, res: Response) => {
-    if (req.oidc?.isAuthenticated()) {
-      res.json({ user: req.oidc.user });
+    if (req.session?.user) {
+      const { stytchUserId, email, name } = req.session.user;
+      res.json({ user: { sub: stytchUserId, email, name } });
     } else {
       res.json({ user: null });
     }
@@ -171,29 +127,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Check if current user is an admin
   app.get("/api/user/is-admin", async (req: Request, res: Response) => {
-    if (!req.oidc?.isAuthenticated()) {
-      return res.json({ isAdmin: false });
-    }
-
-    const user = req.oidc.user;
-    const email = user?.email;
-    const auth0Sub = user?.sub;
-
-    if (!email && !auth0Sub) {
+    const sessionUser = req.session?.user;
+    if (!sessionUser) {
       return res.json({ isAdmin: false });
     }
 
     try {
-      let adminUser;
-      
-      if (email) {
-        adminUser = await storage.getAdminUserByEmail(email);
-      }
-      
-      if (!adminUser && auth0Sub) {
-        adminUser = await storage.getAdminUserByAuth0Sub(auth0Sub);
-      }
-
+      const adminUser = await storage.getAdminUserByEmail(sessionUser.email);
       res.json({ isAdmin: !!adminUser });
     } catch (error) {
       console.error("Error checking admin status:", error);
@@ -214,7 +154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin-users", requiresAdmin(), async (req, res) => {
     try {
-      const { email, name, auth0Sub } = req.body;
+      const { email, name } = req.body;
 
       if (!email || typeof email !== 'string') {
         return res.status(400).json({ message: "Email is required" });
@@ -225,7 +165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Admin user with this email already exists" });
       }
 
-      const newAdmin = await storage.createAdminUser({ email, name, auth0Sub });
+      const newAdmin = await storage.createAdminUser({ email, name });
       res.status(201).json(newAdmin);
     } catch (error) {
       console.error("Error creating admin user:", error);

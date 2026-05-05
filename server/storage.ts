@@ -28,9 +28,10 @@ import { eq } from "drizzle-orm";
 export interface IStorage {
   // Admin user methods
   getAdminUserByEmail(email: string): Promise<AdminUser | undefined>;
-  getAdminUserByAuth0Sub(auth0Sub: string): Promise<AdminUser | undefined>;
+  getAdminUserByStytchUserId(stytchUserId: string): Promise<AdminUser | undefined>;
   createAdminUser(user: InsertAdminUser): Promise<AdminUser>;
   getAllAdminUsers(): Promise<AdminUser[]>;
+  setAdminUserStytchId(id: number, stytchUserId: string): Promise<AdminUser | undefined>;
   
   // Company methods
   getCompany(): Promise<Company | undefined>;
@@ -630,19 +631,19 @@ This Support Policy may be updated to reflect changes in our services or support
     );
   }
 
-  async getAdminUserByAuth0Sub(auth0Sub: string): Promise<AdminUser | undefined> {
+  async getAdminUserByStytchUserId(stytchUserId: string): Promise<AdminUser | undefined> {
     return Array.from(this.adminUsers.values()).find(
-      (user) => user.auth0Sub === auth0Sub,
+      (user) => user.stytchUserId === stytchUserId,
     );
   }
 
   async createAdminUser(insertAdminUser: InsertAdminUser): Promise<AdminUser> {
     const id = this.currentAdminUserId++;
-    const adminUser: AdminUser = { 
+    const adminUser: AdminUser = {
       id,
       email: insertAdminUser.email,
       name: insertAdminUser.name ?? null,
-      auth0Sub: insertAdminUser.auth0Sub ?? null,
+      stytchUserId: insertAdminUser.stytchUserId ?? null,
       createdAt: new Date(),
     };
     this.adminUsers.set(id, adminUser);
@@ -651,6 +652,14 @@ This Support Policy may be updated to reflect changes in our services or support
 
   async getAllAdminUsers(): Promise<AdminUser[]> {
     return Array.from(this.adminUsers.values());
+  }
+
+  async setAdminUserStytchId(id: number, stytchUserId: string): Promise<AdminUser | undefined> {
+    const user = this.adminUsers.get(id);
+    if (!user) return undefined;
+    const updated = { ...user, stytchUserId };
+    this.adminUsers.set(id, updated);
+    return updated;
   }
 
   // Company methods
@@ -1294,8 +1303,8 @@ This Support Policy may be updated to reflect changes in our services or support
     return result[0];
   }
 
-  async getAdminUserByAuth0Sub(auth0Sub: string): Promise<AdminUser | undefined> {
-    const result = await this.db.select().from(adminUsers).where(eq(adminUsers.auth0Sub, auth0Sub)).limit(1);
+  async getAdminUserByStytchUserId(stytchUserId: string): Promise<AdminUser | undefined> {
+    const result = await this.db.select().from(adminUsers).where(eq(adminUsers.stytchUserId, stytchUserId)).limit(1);
     return result[0];
   }
 
@@ -1306,6 +1315,15 @@ This Support Policy may be updated to reflect changes in our services or support
 
   async getAllAdminUsers(): Promise<AdminUser[]> {
     return await this.db.select().from(adminUsers);
+  }
+
+  async setAdminUserStytchId(id: number, stytchUserId: string): Promise<AdminUser | undefined> {
+    const result = await this.db
+      .update(adminUsers)
+      .set({ stytchUserId })
+      .where(eq(adminUsers.id, id))
+      .returning();
+    return result[0];
   }
 
   // Company methods
