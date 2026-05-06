@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Settings, Menu, LogIn, LogOut } from "lucide-react";
 import LoginModal from "@/components/login-modal";
@@ -14,6 +15,7 @@ interface NavigationProps {
 export default function Navigation({ onAdminClick, company, isAuthenticated = false, isAdmin = false }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [location, setLocation] = useLocation();
 
   const handleLogin = () => {
     setLoginOpen(true);
@@ -23,12 +25,20 @@ export default function Navigation({ onAdminClick, company, isAuthenticated = fa
     window.location.href = '/api/logout';
   };
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+  // If we're on the homepage, scroll smoothly to the section. If we're on
+  // another route (/about, /careers, /insights, /admin, etc.), navigate to
+  // the homepage with the matching path so home.tsx's auto-scroll handler
+  // picks it up.
+  const goToSection = (sectionId: string) => {
     setIsMenuOpen(false);
+    if (location === "/") {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      return;
+    }
+    setLocation(`/${sectionId === "home" ? "" : sectionId}`);
   };
 
   const headerPadding = company?.headerPaddingY ?? 16;
@@ -86,31 +96,38 @@ export default function Navigation({ onAdminClick, company, isAuthenticated = fa
           
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
-              <button 
-                onClick={() => scrollToSection('home')}
+              <button
+                onClick={() => goToSection('home')}
                 className="text-lamplight-primary hover:text-lamplight-accent px-3 py-2 text-sm font-medium transition-colors"
               >
                 Home
               </button>
               {company?.showPlatforms !== false && (
-                <button 
-                  onClick={() => scrollToSection('platforms')}
+                <button
+                  onClick={() => goToSection('platforms')}
                   className="text-slate-500 hover:text-lamplight-accent px-3 py-2 text-sm font-medium transition-colors"
                 >
                   Platforms
                 </button>
               )}
               {company?.showAbout !== false && (
-                <button 
-                  onClick={() => scrollToSection('about')}
+                <button
+                  onClick={() => goToSection('why')}
                   className="text-slate-500 hover:text-lamplight-accent px-3 py-2 text-sm font-medium transition-colors"
                 >
-                  About
+                  Why
                 </button>
               )}
+              <Link
+                href="/about"
+                onClick={() => setIsMenuOpen(false)}
+                className="text-slate-500 hover:text-lamplight-accent px-3 py-2 text-sm font-medium transition-colors"
+              >
+                About
+              </Link>
               {company?.showContact !== false && (
-                <button 
-                  onClick={() => scrollToSection('contact')}
+                <button
+                  onClick={() => goToSection('contact')}
                   className="text-slate-500 hover:text-lamplight-accent px-3 py-2 text-sm font-medium transition-colors"
                 >
                   Contact
@@ -166,31 +183,38 @@ export default function Navigation({ onAdminClick, company, isAuthenticated = fa
         {isMenuOpen && (
           <div className="md:hidden border-t border-slate-200 py-4">
             <div className="flex flex-col space-y-2">
-              <button 
-                onClick={() => scrollToSection('home')}
+              <button
+                onClick={() => goToSection('home')}
                 className="text-left px-3 py-2 text-sm font-medium text-slate-600 hover:text-lamplight-accent"
               >
                 Home
               </button>
               {company?.showPlatforms !== false && (
-                <button 
-                  onClick={() => scrollToSection('platforms')}
+                <button
+                  onClick={() => goToSection('platforms')}
                   className="text-left px-3 py-2 text-sm font-medium text-slate-600 hover:text-lamplight-accent"
                 >
                   Platforms
                 </button>
               )}
               {company?.showAbout !== false && (
-                <button 
-                  onClick={() => scrollToSection('about')}
+                <button
+                  onClick={() => goToSection('why')}
                   className="text-left px-3 py-2 text-sm font-medium text-slate-600 hover:text-lamplight-accent"
                 >
-                  About
+                  Why
                 </button>
               )}
+              <Link
+                href="/about"
+                onClick={() => setIsMenuOpen(false)}
+                className="text-left px-3 py-2 text-sm font-medium text-slate-600 hover:text-lamplight-accent"
+              >
+                About
+              </Link>
               {company?.showContact !== false && (
-                <button 
-                  onClick={() => scrollToSection('contact')}
+                <button
+                  onClick={() => goToSection('contact')}
                   className="text-left px-3 py-2 text-sm font-medium text-slate-600 hover:text-lamplight-accent"
                 >
                   Contact

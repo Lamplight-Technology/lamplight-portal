@@ -19,6 +19,7 @@ function Router() {
       <Route path="/careers" component={CareersPage} />
       <Route path="/insights" component={InsightsPage} />
       {/* Anchor-section deep links — render Home; the page reads the path and scrolls to the matching section */}
+      <Route path="/why" component={Home} />
       <Route path="/platforms" component={Home} />
       <Route path="/contact" component={Home} />
       <Route path="/admin" component={AdminPage} />

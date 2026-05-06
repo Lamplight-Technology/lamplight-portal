@@ -52,6 +52,7 @@ export default function Home() {
     if (companyLoading || platformsLoading) return;
     const path = window.location.pathname.replace(/\/$/, "");
     const anchorMap: Record<string, string> = {
+      "/why": "why",
       "/platforms": "platforms",
       "/contact": "contact",
     };
@@ -94,7 +95,7 @@ export default function Home() {
         {company?.showAbout !== false && (
         <>
         {/* Company Overview */}
-        <section id="about" className="py-20 md:py-28 bg-gradient-to-b from-white to-slate-50 relative overflow-hidden">
+        <section id="why" className="py-20 md:py-28 bg-gradient-to-b from-white to-slate-50 relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDE2YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00em0wIDI4YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00ek0xMiAzMmMtMi4yMSAwLTQtMS43OS00LTRzMS43OS00IDQtNCA0IDEuNzkgNCA0LTEuNzkgNC00IDR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-60"></div>
           
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
