@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Settings, Menu, LogIn, LogOut } from "lucide-react";
-import LoginModal from "@/components/login-modal";
+import { Settings, Menu, LogOut } from "lucide-react";
 import type { Company } from "@shared/schema";
 
 interface NavigationProps {
@@ -14,12 +13,7 @@ interface NavigationProps {
 
 export default function Navigation({ onAdminClick, company, isAuthenticated = false, isAdmin = false }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
   const [location, setLocation] = useLocation();
-
-  const handleLogin = () => {
-    setLoginOpen(true);
-  };
 
   const handleLogout = () => {
     window.location.href = '/api/logout';
@@ -133,9 +127,9 @@ export default function Navigation({ onAdminClick, company, isAuthenticated = fa
                   Contact
                 </button>
               )}
-              {isAuthenticated ? (
+              {isAuthenticated && (
                 <>
-                  <Button 
+                  <Button
                     onClick={onAdminClick}
                     className="bg-lamplight-accent text-white hover:bg-blue-600"
                     size="sm"
@@ -144,7 +138,7 @@ export default function Navigation({ onAdminClick, company, isAuthenticated = fa
                     <Settings className="h-4 w-4 mr-2" />
                     Admin
                   </Button>
-                  <Button 
+                  <Button
                     onClick={handleLogout}
                     variant="outline"
                     size="sm"
@@ -154,16 +148,6 @@ export default function Navigation({ onAdminClick, company, isAuthenticated = fa
                     Logout
                   </Button>
                 </>
-              ) : (
-                <Button 
-                  onClick={handleLogin}
-                  className="bg-lamplight-accent text-white hover:bg-blue-600"
-                  size="sm"
-                  data-testid="button-login"
-                >
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Login
-                </Button>
               )}
             </div>
           </div>
@@ -220,9 +204,9 @@ export default function Navigation({ onAdminClick, company, isAuthenticated = fa
                   Contact
                 </button>
               )}
-              {isAuthenticated ? (
+              {isAuthenticated && (
                 <>
-                  <Button 
+                  <Button
                     onClick={onAdminClick}
                     className="bg-lamplight-accent text-white hover:bg-blue-600 mx-3"
                     size="sm"
@@ -231,7 +215,7 @@ export default function Navigation({ onAdminClick, company, isAuthenticated = fa
                     <Settings className="h-4 w-4 mr-2" />
                     Admin
                   </Button>
-                  <Button 
+                  <Button
                     onClick={handleLogout}
                     variant="outline"
                     className="mx-3"
@@ -242,22 +226,11 @@ export default function Navigation({ onAdminClick, company, isAuthenticated = fa
                     Logout
                   </Button>
                 </>
-              ) : (
-                <Button 
-                  onClick={handleLogin}
-                  className="bg-lamplight-accent text-white hover:bg-blue-600 mx-3"
-                  size="sm"
-                  data-testid="button-login-mobile"
-                >
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Login
-                </Button>
               )}
             </div>
           </div>
         )}
       </div>
-      <LoginModal open={loginOpen} onOpenChange={setLoginOpen} redirect="/admin" />
     </nav>
   );
 }

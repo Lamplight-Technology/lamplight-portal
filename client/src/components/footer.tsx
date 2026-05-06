@@ -1,4 +1,7 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Mail } from "lucide-react";
+import LoginModal from "@/components/login-modal";
 import type { Company } from "@shared/schema";
 
 interface FooterProps {
@@ -8,6 +11,12 @@ interface FooterProps {
 export default function Footer({ company }: FooterProps) {
   const defaultBlurb = "Specializing in cutting-edge SaaS platforms that transform how businesses operate, scale, and succeed in the digital economy.";
   const defaultEmail = "info@example.com";
+  const [loginOpen, setLoginOpen] = useState(false);
+
+  const { data: authData } = useQuery<{ user: any | null }>({
+    queryKey: ["/api/user"],
+  });
+  const isAuthenticated = authData?.user !== null && authData?.user !== undefined;
 
   return (
     <footer className="bg-slate-900 text-white py-12">
@@ -72,11 +81,27 @@ export default function Footer({ company }: FooterProps) {
           <div className="text-slate-400 text-sm mb-4 md:mb-0">
             © {new Date().getFullYear()} {company?.name?.trim() || "Lamplight Technology"}. All rights reserved.
           </div>
-          <div className="text-slate-400 text-sm">
-            Website designed and developed by <span className="text-blue-400">Lamplight Software</span>
+          <div className="text-slate-400 text-sm flex items-center gap-3">
+            <span>
+              Website designed and developed by <span className="text-blue-400">Lamplight Software</span>
+            </span>
+            {!isAuthenticated && (
+              <>
+                <span aria-hidden className="text-slate-700">·</span>
+                <button
+                  type="button"
+                  onClick={() => setLoginOpen(true)}
+                  className="text-slate-600 hover:text-slate-300 text-xs transition-colors"
+                  data-testid="link-footer-signin"
+                >
+                  Sign in
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
+      <LoginModal open={loginOpen} onOpenChange={setLoginOpen} redirect="/admin" />
     </footer>
   );
 }
