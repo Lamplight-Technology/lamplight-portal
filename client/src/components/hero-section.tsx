@@ -21,8 +21,8 @@ export default function HeroSection({ company }: HeroSectionProps) {
     }
   };
 
-  const scrollToAbout = () => {
-    const element = document.getElementById('about');
+  const scrollToWhy = () => {
+    const element = document.getElementById('why');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -98,7 +98,7 @@ export default function HeroSection({ company }: HeroSectionProps) {
               )}
               {company?.showAbout !== false && (
                 <Button
-                  onClick={scrollToAbout}
+                  onClick={scrollToWhy}
                   variant="outline"
                   className="border-2 border-blue-300/50 bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm px-8 py-6 text-lg transition-all duration-300 group"
                   size="lg"
