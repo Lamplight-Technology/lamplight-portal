@@ -1,83 +1,59 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { auth } from "express-openid-connect";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { setupAuth } from "./auth";
 
 const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
 const getBaseURL = (): string => {
+  // Hostnames are case-insensitive (RFC 3986), but Stytch's redirect-URL
+  // allowlist matches strictly — normalize to lowercase to avoid mismatches.
+  const host = (raw: string) => raw.trim().toLowerCase();
+
   // 1. Check for custom domain first (production with custom domain)
   if (process.env.CUSTOM_DOMAIN) {
-    return `https://${process.env.CUSTOM_DOMAIN}`;
+    return `https://${host(process.env.CUSTOM_DOMAIN)}`;
   }
-  
-  // 2. Check for REPLIT_DOMAINS (published Replit apps)
+
+  // 2. Railway public domain
+  if (process.env.RAILWAY_PUBLIC_DOMAIN) {
+    return `https://${host(process.env.RAILWAY_PUBLIC_DOMAIN)}`;
+  }
+
+  // 3. Check for REPLIT_DOMAINS (published Replit apps)
   if (process.env.REPLIT_DOMAINS) {
     const domains = process.env.REPLIT_DOMAINS.split(',').map(d => d.trim()).filter(Boolean);
-    
+
     // Prefer .replit.app domains (official published app domain)
     const replitAppDomain = domains.find(d => d.endsWith('.replit.app'));
     if (replitAppDomain) {
-      return `https://${replitAppDomain}`;
+      return `https://${host(replitAppDomain)}`;
     }
-    
+
     // Fall back to first HTTPS-compatible domain
     const firstDomain = domains[0];
     if (firstDomain && firstDomain.includes('.')) {
-      return `https://${firstDomain}`;
+      return `https://${host(firstDomain)}`;
     }
   }
-  
-  // 3. Check for Replit dev domain (Replit development/workspace)
+
+  // 4. Check for Replit dev domain (Replit development/workspace)
   if (process.env.REPLIT_DEV_DOMAIN) {
-    return `https://${process.env.REPLIT_DEV_DOMAIN}`;
+    return `https://${host(process.env.REPLIT_DEV_DOMAIN)}`;
   }
-  
-  // 4. Legacy: Check if we're in production mode on Replit (older deployments)
+
+  // 5. Legacy: Check if we're in production mode on Replit (older deployments)
   if (process.env.REPL_SLUG && process.env.REPL_OWNER) {
-    return `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`;
+    return `https://${host(process.env.REPL_SLUG)}.${host(process.env.REPL_OWNER)}.repl.co`;
   }
-  
-  // 5. Fallback for local development
+
+  // 6. Fallback for local development
   return 'http://localhost:5000';
 };
 
-// Only use auth if all required environment variables are present
-if (process.env.AUTH0_SECRET && process.env.AUTH0_CLIENT_ID && process.env.AUTH0_DOMAIN) {
-  const baseURL = getBaseURL();
-  console.log(`Auth0 configured with baseURL: ${baseURL}`);
-  const config = {
-    authRequired: false,
-    auth0Logout: true,
-    idpLogout: true,
-    secret: process.env.AUTH0_SECRET,
-    baseURL,
-    clientID: process.env.AUTH0_CLIENT_ID,
-    issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}`,
-    routes: {
-      callback: '/callback',
-      login: '/api/login',
-      logout: '/api/logout',
-      postLogoutRedirect: '/'
-    },
-    session: {
-      name: 'lamplight_session',
-      rolling: true,
-      rollingDuration: 86400
-    }
-  };
-
-  app.use(auth(config));
-} else {
-  console.log('Auth0 configuration not found, running without authentication');
-  // Add a simple middleware to simulate no user logged in
-  app.use((req: any, res, next) => {
-    req.oidc = { user: null, isAuthenticated: () => false };
-    next();
-  });
-}
+setupAuth(app, getBaseURL());
 
 app.use((req, res, next) => {
   const start = Date.now();

@@ -9,8 +9,9 @@ import AccessDenied from "@/components/access-denied";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import * as Icons from "lucide-react";
 import { ChartLine, Shield, Users } from "lucide-react";
-import type { Company, Platform } from "@shared/schema";
+import type { Company, Platform, AboutFeatureCard, HeroBadge } from "@shared/schema";
 
 export default function Home() {
   const [showAdmin, setShowAdmin] = useState(false);
@@ -21,6 +22,10 @@ export default function Home() {
 
   const { data: platforms = [], isLoading: platformsLoading } = useQuery<Platform[]>({
     queryKey: ["/api/platforms"],
+  });
+
+  const { data: featureCards = [], isLoading: featureCardsLoading } = useQuery<AboutFeatureCard[]>({
+    queryKey: ["/api/about-feature-cards"],
   });
 
   const { data: authData, isLoading: authLoading } = useQuery<{ user: any | null }>({
@@ -38,6 +43,25 @@ export default function Home() {
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ["/api/user"] });
   }, []);
+
+  // If the user landed on /about, /platforms, or /contact directly, scroll to the matching section
+  // once the page content is loaded. Wait one tick for the anchors to render.
+  useEffect(() => {
+    if (companyLoading || platformsLoading) return;
+    const path = window.location.pathname.replace(/\/$/, "");
+    const anchorMap: Record<string, string> = {
+      "/about": "about",
+      "/platforms": "platforms",
+      "/contact": "contact",
+    };
+    const sectionId = anchorMap[path];
+    if (!sectionId) return;
+    // RAF gives the layout a frame to settle before measuring scroll positions.
+    requestAnimationFrame(() => {
+      const el = document.getElementById(sectionId);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [companyLoading, platformsLoading]);
 
   useEffect(() => {
     if (!isAuthenticated && showAdmin) {
@@ -75,7 +99,9 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center mb-16">
               <div className="inline-block">
-                <div className="text-sm font-semibold text-blue-600 mb-3 tracking-wide uppercase">Why Choose Us</div>
+                <div className="text-sm font-semibold text-blue-600 mb-3 tracking-wide uppercase">
+                  {company?.aboutSectionLabel || "Why Choose Us"}
+                </div>
                 <h2 className="text-4xl md:text-5xl font-bold text-lamplight-primary mb-6 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                   {company?.aboutTitle || "Building the Future of Software"}
                 </h2>
@@ -84,41 +110,69 @@ export default function Home() {
                 {company?.aboutDescription}
               </p>
             </div>
-            
-            <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
-              <div className="group relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-2xl transform group-hover:scale-105 transition-transform duration-300"></div>
-                <div className="relative bg-white/60 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100">
-                  <div className="bg-gradient-to-br from-blue-500 to-cyan-500 w-14 h-14 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-blue-500/30">
-                    <ChartLine className="h-7 w-7 text-white" />
+
+            <div className={`grid ${
+              company?.aboutCardsLayout === "2-col" ? "md:grid-cols-2" :
+              company?.aboutCardsLayout === "4-col" ? "md:grid-cols-2 lg:grid-cols-4" :
+              "md:grid-cols-3"
+            } gap-8 lg:gap-12`}>
+              {featureCards.filter(card => card.isActive).map((card) => {
+                const IconComponent = Icons[card.iconName as keyof typeof Icons] || Icons.HelpCircle;
+                return (
+                  <div key={card.id} className="group relative">
+                    <div
+                      className="absolute inset-0 rounded-2xl transform group-hover:scale-105 transition-transform duration-300"
+                      style={{
+                        background: `linear-gradient(to bottom right, ${card.gradientFrom}20, ${card.gradientTo}20)`
+                      }}
+                    ></div>
+                    <div
+                      className="relative bg-white/60 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border"
+                      style={{ borderColor: card.borderColor }}
+                    >
+                      <div
+                        className="w-14 h-14 rounded-xl flex items-center justify-center mb-5 shadow-lg"
+                        style={{
+                          background: `linear-gradient(to bottom right, ${card.gradientFrom}, ${card.gradientTo})`,
+                          boxShadow: `0 10px 15px -3px ${card.gradientFrom}30`
+                        }}
+                      >
+                        <IconComponent className="h-7 w-7 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-lamplight-primary mb-3">
+                        {card.title}
+                      </h3>
+                      <p className="text-slate-600 leading-relaxed">
+                        {card.description}
+                      </p>
+                    </div>
                   </div>
-                  <h3 className="text-2xl font-bold text-lamplight-primary mb-3">Growth Focused</h3>
-                  <p className="text-slate-600 leading-relaxed">Accelerating business growth through innovative technology solutions</p>
-                </div>
-              </div>
-              
-              <div className="group relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl transform group-hover:scale-105 transition-transform duration-300"></div>
-                <div className="relative bg-white/60 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-green-100">
-                  <div className="bg-gradient-to-br from-green-500 to-emerald-500 w-14 h-14 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-green-500/30">
-                    <Shield className="h-7 w-7 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-lamplight-primary mb-3">Enterprise Security</h3>
-                  <p className="text-slate-600 leading-relaxed">Bank-level security and compliance across all our platforms</p>
-                </div>
-              </div>
-              
-              <div className="group relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-2xl transform group-hover:scale-105 transition-transform duration-300"></div>
-                <div className="relative bg-white/60 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-purple-100">
-                  <div className="bg-gradient-to-br from-purple-500 to-pink-500 w-14 h-14 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-purple-500/30">
-                    <Users className="h-7 w-7 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-lamplight-primary mb-3">Customer Success</h3>
-                  <p className="text-slate-600 leading-relaxed">Dedicated support and success teams for every platform</p>
-                </div>
-              </div>
+                );
+              })}
             </div>
+
+            {/* Values pull-quote — bookends the section beneath the pillar cards */}
+            {company?.aboutPullQuote && (
+              <div className="mt-16 md:mt-20 flex justify-center">
+                <div className="relative max-w-3xl text-center">
+                  <div
+                    aria-hidden="true"
+                    className="absolute -top-6 left-1/2 -translate-x-1/2 text-7xl text-blue-200/70 font-serif leading-none select-none"
+                  >
+                    &ldquo;
+                  </div>
+                  <p
+                    className="relative text-2xl md:text-3xl font-light italic text-slate-700 leading-relaxed px-6"
+                    data-testid="text-about-pull-quote"
+                  >
+                    {company.aboutPullQuote}
+                  </p>
+                  <div className="mt-4 flex justify-center">
+                    <div className="h-px w-16 bg-gradient-to-r from-transparent via-blue-400/50 to-transparent"></div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </section>
         </>
@@ -133,12 +187,14 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <div className="inline-block">
-                <div className="text-sm font-semibold text-blue-600 mb-3 tracking-wide uppercase">Our Solutions</div>
+                <div className="text-sm font-semibold text-blue-600 mb-3 tracking-wide uppercase">
+                  {company?.platformsSectionLabel || "Our Solutions"}
+                </div>
                 <h2 className="text-4xl md:text-5xl font-bold text-lamplight-primary mb-6 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                  Our SaaS Platforms
+                  {company?.platformsTitle || "Our SaaS Platforms"}
                 </h2>
               </div>
-              <p className="text-xl text-slate-600 max-w-3xl mx-auto">Discover our platforms and services</p>
+              <p className="text-xl text-slate-600 max-w-3xl mx-auto">{company?.platformsDescription || "Discover our platforms and services"}</p>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -163,13 +219,15 @@ export default function Home() {
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center">
               <div className="inline-block">
-                <div className="text-sm font-semibold text-blue-400 mb-3 tracking-wide uppercase">Let's Connect</div>
+                <div className="text-sm font-semibold text-blue-400 mb-3 tracking-wide uppercase">
+                  {company?.contactSectionLabel || "Let's Connect"}
+                </div>
                 <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-                  Get in Touch
+                  {company?.contactTitle || "Get in Touch"}
                 </h2>
               </div>
               <p className="text-xl text-blue-100 mb-12 leading-relaxed max-w-2xl mx-auto">
-                Ready to transform your business with our SaaS platforms? Our team is here to help you get started.
+                {company?.contactDescription || "Ready to transform your business with our SaaS platforms? Our team is here to help you get started."}
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
                 <Button 
@@ -179,7 +237,7 @@ export default function Home() {
                   size="lg"
                 >
                   <a href={`mailto:${company?.contactEmail || 'info@example.com'}`}>
-                    Contact Us
+                    {company?.contactButtonText || "Contact Us"}
                   </a>
                 </Button>
               </div>

@@ -3,14 +3,23 @@ import {
   platforms,
   adminUsers,
   legalDocuments,
+  aboutFeatureCards,
+  heroBadges,
+  mediaFiles,
   type Company,
   type Platform,
   type AdminUser,
   type LegalDocument,
+  type AboutFeatureCard,
+  type HeroBadge,
+  type MediaFile,
   type InsertCompany,
   type InsertPlatform,
   type InsertAdminUser,
-  type InsertLegalDocument
+  type InsertLegalDocument,
+  type InsertAboutFeatureCard,
+  type InsertHeroBadge,
+  type InsertMediaFile,
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
@@ -19,9 +28,10 @@ import { eq } from "drizzle-orm";
 export interface IStorage {
   // Admin user methods
   getAdminUserByEmail(email: string): Promise<AdminUser | undefined>;
-  getAdminUserByAuth0Sub(auth0Sub: string): Promise<AdminUser | undefined>;
+  getAdminUserByStytchUserId(stytchUserId: string): Promise<AdminUser | undefined>;
   createAdminUser(user: InsertAdminUser): Promise<AdminUser>;
   getAllAdminUsers(): Promise<AdminUser[]>;
+  setAdminUserStytchId(id: number, stytchUserId: string): Promise<AdminUser | undefined>;
   
   // Company methods
   getCompany(): Promise<Company | undefined>;
@@ -41,6 +51,24 @@ export interface IStorage {
   createLegalDocument(document: InsertLegalDocument): Promise<LegalDocument>;
   updateLegalDocument(id: number, document: Partial<InsertLegalDocument>): Promise<LegalDocument | undefined>;
   deleteLegalDocument(id: number): Promise<boolean>;
+
+  // About feature card methods
+  getAboutFeatureCards(companyId: number): Promise<AboutFeatureCard[]>;
+  createAboutFeatureCard(card: InsertAboutFeatureCard): Promise<AboutFeatureCard>;
+  updateAboutFeatureCard(id: number, card: Partial<InsertAboutFeatureCard>): Promise<AboutFeatureCard | undefined>;
+  deleteAboutFeatureCard(id: number): Promise<boolean>;
+
+  // Hero badge methods
+  getHeroBadges(companyId: number): Promise<HeroBadge[]>;
+  createHeroBadge(badge: InsertHeroBadge): Promise<HeroBadge>;
+  updateHeroBadge(id: number, badge: Partial<InsertHeroBadge>): Promise<HeroBadge | undefined>;
+  deleteHeroBadge(id: number): Promise<boolean>;
+
+  // Media file methods
+  getAllMediaFiles(): Promise<MediaFile[]>;
+  getMediaFile(id: number): Promise<MediaFile | undefined>;
+  createMediaFile(file: InsertMediaFile): Promise<MediaFile>;
+  deleteMediaFile(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -48,21 +76,33 @@ export class MemStorage implements IStorage {
   private companies: Map<number, Company>;
   private platforms: Map<number, Platform>;
   private legalDocuments: Map<number, LegalDocument>;
+  private mediaFiles: Map<number, MediaFile>;
+  private aboutFeatureCards: Map<number, AboutFeatureCard>;
+  private heroBadges: Map<number, HeroBadge>;
   private currentAdminUserId: number;
   private currentCompanyId: number;
   private currentPlatformId: number;
   private currentLegalDocumentId: number;
+  private currentAboutFeatureCardId: number;
+  private currentHeroBadgeId: number;
+  private currentMediaFileId: number;
 
   constructor() {
     this.adminUsers = new Map();
     this.companies = new Map();
     this.platforms = new Map();
     this.legalDocuments = new Map();
+    this.aboutFeatureCards = new Map();
+    this.heroBadges = new Map();
     this.currentAdminUserId = 1;
     this.currentCompanyId = 1;
     this.currentPlatformId = 1;
     this.currentLegalDocumentId = 1;
-    
+    this.currentAboutFeatureCardId = 1;
+    this.currentHeroBadgeId = 1;
+    this.currentMediaFileId = 1;
+    this.mediaFiles = new Map();
+
     // Initialize with default company data
     this.initializeDefaultData();
   }
@@ -73,10 +113,44 @@ export class MemStorage implements IStorage {
       id: 1,
       name: "Lamplight Technology",
       logo: null,
-      heroTitle: "Empowering Business Through Software Innovation",
+      logoHeight: 40,
+      showNameWithLogo: false,
+      titleFontFamily: "Inter",
+      titleFontSize: 24,
+      titleFontWeight: "700",
+      titleColor: "#0f172a",
+      sloganText: null,
+      sloganFontFamily: "Inter",
+      sloganFontSize: 14,
+      sloganFontWeight: "400",
+      sloganColor: "#64748b",
+      headerPaddingY: 16,
+      heroBadge: "Next-Generation SaaS Solutions",
+      heroTitle: "Empowering Business Through",
+      heroTitleHighlight: "Software Innovation",
       heroDescription: "Lamplight Technology is a leading holding company specializing in cutting-edge SaaS platforms that transform how businesses operate, scale, and succeed in the digital economy.",
+      heroButtonPrimary: "Explore Our Platforms",
+      heroButtonSecondary: "Learn More",
+      heroBackgroundGradientFrom: "#0f172a",
+      heroBackgroundGradientVia: "#1e3a8a",
+      heroBackgroundGradientTo: "#312e81",
+      heroBlobColor1: "#3b82f6",
+      heroBlobColor2: "#a855f7",
+      heroBlobColor3: "#6366f1",
       aboutTitle: "Building the Future of Software",
       aboutDescription: "With a portfolio of innovative SaaS platforms, Lamplight Technology drives digital transformation across industries. Our mission is to create powerful, scalable solutions that enable businesses to thrive in an increasingly connected world.",
+      platformsTitle: "Our SaaS Platforms",
+      platformsDescription: "Discover our platforms and services",
+      contactTitle: "Get in Touch",
+      contactDescription: "Ready to transform your business with our SaaS platforms? Our team is here to help you get started.",
+      heroBackgroundImage: null,
+      heroBackgroundImageOpacity: 50,
+      heroSideImage: null,
+      aboutSectionLabel: "Why Choose Us",
+      aboutCardsLayout: "3-col",
+      platformsSectionLabel: "Our Solutions",
+      contactSectionLabel: "Let's Connect",
+      contactButtonText: "Contact Us",
       contactEmail: "contact@lamplighttech.com",
       siteTitle: "Lamplight Technology",
       maintenanceMode: false,
@@ -156,6 +230,87 @@ export class MemStorage implements IStorage {
       this.platforms.set(platform.id, platform);
     });
     this.currentPlatformId = 7;
+
+    // Create default about feature cards
+    const defaultAboutFeatureCards: AboutFeatureCard[] = [
+      {
+        id: 1,
+        companyId: 1,
+        title: "Growth Focused",
+        description: "Accelerating business growth through innovative technology solutions",
+        iconName: "ChartLine",
+        gradientFrom: "#3b82f6",
+        gradientTo: "#06b6d4",
+        borderColor: "#dbeafe",
+        sortOrder: 1,
+        isActive: true,
+      },
+      {
+        id: 2,
+        companyId: 1,
+        title: "Enterprise Security",
+        description: "Bank-level security and compliance across all our platforms",
+        iconName: "Shield",
+        gradientFrom: "#10b981",
+        gradientTo: "#34d399",
+        borderColor: "#d1fae5",
+        sortOrder: 2,
+        isActive: true,
+      },
+      {
+        id: 3,
+        companyId: 1,
+        title: "Customer Success",
+        description: "Dedicated support and success teams for every platform",
+        iconName: "Users",
+        gradientFrom: "#a855f7",
+        gradientTo: "#ec4899",
+        borderColor: "#fae8ff",
+        sortOrder: 3,
+        isActive: true,
+      },
+    ];
+
+    defaultAboutFeatureCards.forEach(card => {
+      this.aboutFeatureCards.set(card.id, card);
+    });
+    this.currentAboutFeatureCardId = 4;
+
+    // Create default hero badges
+    const defaultHeroBadges: HeroBadge[] = [
+      {
+        id: 1,
+        companyId: 1,
+        text: "Fast & Reliable",
+        iconName: "Zap",
+        iconColor: "#fbbf24",
+        sortOrder: 1,
+        isActive: true,
+      },
+      {
+        id: 2,
+        companyId: 1,
+        text: "Enterprise Security",
+        iconName: "Shield",
+        iconColor: "#34d399",
+        sortOrder: 2,
+        isActive: true,
+      },
+      {
+        id: 3,
+        companyId: 1,
+        text: "AI-Powered",
+        iconName: "Sparkles",
+        iconColor: "#a78bfa",
+        sortOrder: 3,
+        isActive: true,
+      },
+    ];
+
+    defaultHeroBadges.forEach(badge => {
+      this.heroBadges.set(badge.id, badge);
+    });
+    this.currentHeroBadgeId = 4;
 
     // Create default legal documents
     const defaultLegalDocuments: LegalDocument[] = [
@@ -476,19 +631,19 @@ This Support Policy may be updated to reflect changes in our services or support
     );
   }
 
-  async getAdminUserByAuth0Sub(auth0Sub: string): Promise<AdminUser | undefined> {
+  async getAdminUserByStytchUserId(stytchUserId: string): Promise<AdminUser | undefined> {
     return Array.from(this.adminUsers.values()).find(
-      (user) => user.auth0Sub === auth0Sub,
+      (user) => user.stytchUserId === stytchUserId,
     );
   }
 
   async createAdminUser(insertAdminUser: InsertAdminUser): Promise<AdminUser> {
     const id = this.currentAdminUserId++;
-    const adminUser: AdminUser = { 
+    const adminUser: AdminUser = {
       id,
       email: insertAdminUser.email,
       name: insertAdminUser.name ?? null,
-      auth0Sub: insertAdminUser.auth0Sub ?? null,
+      stytchUserId: insertAdminUser.stytchUserId ?? null,
       createdAt: new Date(),
     };
     this.adminUsers.set(id, adminUser);
@@ -497,6 +652,14 @@ This Support Policy may be updated to reflect changes in our services or support
 
   async getAllAdminUsers(): Promise<AdminUser[]> {
     return Array.from(this.adminUsers.values());
+  }
+
+  async setAdminUserStytchId(id: number, stytchUserId: string): Promise<AdminUser | undefined> {
+    const user = this.adminUsers.get(id);
+    if (!user) return undefined;
+    const updated = { ...user, stytchUserId };
+    this.adminUsers.set(id, updated);
+    return updated;
   }
 
   // Company methods
@@ -509,6 +672,40 @@ This Support Policy may be updated to reflect changes in our services or support
     const company: Company = { 
       ...insertCompany,
       logo: insertCompany.logo ?? null,
+      logoHeight: insertCompany.logoHeight ?? 40,
+      showNameWithLogo: insertCompany.showNameWithLogo ?? false,
+      titleFontFamily: insertCompany.titleFontFamily ?? "Inter",
+      titleFontSize: insertCompany.titleFontSize ?? 24,
+      titleFontWeight: insertCompany.titleFontWeight ?? "700",
+      titleColor: insertCompany.titleColor ?? "#0f172a",
+      sloganText: insertCompany.sloganText ?? null,
+      sloganFontFamily: insertCompany.sloganFontFamily ?? "Inter",
+      sloganFontSize: insertCompany.sloganFontSize ?? 14,
+      sloganFontWeight: insertCompany.sloganFontWeight ?? "400",
+      sloganColor: insertCompany.sloganColor ?? "#64748b",
+      headerPaddingY: insertCompany.headerPaddingY ?? 16,
+      heroBadge: insertCompany.heroBadge ?? null,
+      heroTitleHighlight: insertCompany.heroTitleHighlight ?? null,
+      heroButtonPrimary: insertCompany.heroButtonPrimary ?? "Explore Our Platforms",
+      heroButtonSecondary: insertCompany.heroButtonSecondary ?? "Learn More",
+      heroBackgroundGradientFrom: insertCompany.heroBackgroundGradientFrom ?? "#0f172a",
+      heroBackgroundGradientVia: insertCompany.heroBackgroundGradientVia ?? "#1e3a8a",
+      heroBackgroundGradientTo: insertCompany.heroBackgroundGradientTo ?? "#312e81",
+      heroBlobColor1: insertCompany.heroBlobColor1 ?? "#3b82f6",
+      heroBlobColor2: insertCompany.heroBlobColor2 ?? "#a855f7",
+      heroBlobColor3: insertCompany.heroBlobColor3 ?? "#6366f1",
+      heroBackgroundImage: insertCompany.heroBackgroundImage ?? null,
+      heroBackgroundImageOpacity: insertCompany.heroBackgroundImageOpacity ?? 50,
+      heroSideImage: insertCompany.heroSideImage ?? null,
+      aboutSectionLabel: insertCompany.aboutSectionLabel ?? "Why Choose Us",
+      aboutCardsLayout: insertCompany.aboutCardsLayout ?? "3-col",
+      platformsSectionLabel: insertCompany.platformsSectionLabel ?? "Our Solutions",
+      contactSectionLabel: insertCompany.contactSectionLabel ?? "Let's Connect",
+      platformsTitle: insertCompany.platformsTitle ?? null,
+      platformsDescription: insertCompany.platformsDescription ?? null,
+      contactTitle: insertCompany.contactTitle ?? null,
+      contactDescription: insertCompany.contactDescription ?? null,
+      contactButtonText: insertCompany.contactButtonText ?? "Contact Us",
       contactEmail: insertCompany.contactEmail ?? null,
       siteTitle: insertCompany.siteTitle ?? null,
       maintenanceMode: insertCompany.maintenanceMode ?? null,
@@ -611,6 +808,103 @@ This Support Policy may be updated to reflect changes in our services or support
 
   async deleteLegalDocument(id: number): Promise<boolean> {
     return this.legalDocuments.delete(id);
+  }
+
+  // About Feature Card methods
+  async getAboutFeatureCards(companyId: number): Promise<AboutFeatureCard[]> {
+    return Array.from(this.aboutFeatureCards.values())
+      .filter(card => card.companyId === companyId && card.isActive)
+      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  }
+
+  async createAboutFeatureCard(insertCard: InsertAboutFeatureCard): Promise<AboutFeatureCard> {
+    const id = this.currentAboutFeatureCardId++;
+    const card: AboutFeatureCard = {
+      ...insertCard,
+      id,
+      companyId: insertCard.companyId ?? 1,
+      gradientFrom: insertCard.gradientFrom ?? "#3b82f6",
+      gradientTo: insertCard.gradientTo ?? "#06b6d4",
+      borderColor: insertCard.borderColor ?? "#dbeafe",
+      sortOrder: insertCard.sortOrder ?? 0,
+      isActive: insertCard.isActive ?? true,
+    };
+    this.aboutFeatureCards.set(id, card);
+    return card;
+  }
+
+  async updateAboutFeatureCard(id: number, updates: Partial<InsertAboutFeatureCard>): Promise<AboutFeatureCard | undefined> {
+    const card = this.aboutFeatureCards.get(id);
+    if (!card) return undefined;
+    const updated = { ...card, ...updates };
+    this.aboutFeatureCards.set(id, updated);
+    return updated;
+  }
+
+  async deleteAboutFeatureCard(id: number): Promise<boolean> {
+    return this.aboutFeatureCards.delete(id);
+  }
+
+  // Hero Badge methods
+  async getHeroBadges(companyId: number): Promise<HeroBadge[]> {
+    return Array.from(this.heroBadges.values())
+      .filter(badge => badge.companyId === companyId && badge.isActive)
+      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  }
+
+  async createHeroBadge(insertBadge: InsertHeroBadge): Promise<HeroBadge> {
+    const id = this.currentHeroBadgeId++;
+    const badge: HeroBadge = {
+      ...insertBadge,
+      id,
+      companyId: insertBadge.companyId ?? 1,
+      iconColor: insertBadge.iconColor ?? "#fbbf24",
+      sortOrder: insertBadge.sortOrder ?? 0,
+      isActive: insertBadge.isActive ?? true,
+    };
+    this.heroBadges.set(id, badge);
+    return badge;
+  }
+
+  async updateHeroBadge(id: number, updates: Partial<InsertHeroBadge>): Promise<HeroBadge | undefined> {
+    const badge = this.heroBadges.get(id);
+    if (!badge) return undefined;
+    const updated = { ...badge, ...updates };
+    this.heroBadges.set(id, updated);
+    return updated;
+  }
+
+  async deleteHeroBadge(id: number): Promise<boolean> {
+    return this.heroBadges.delete(id);
+  }
+
+  // Media File methods
+  async getAllMediaFiles(): Promise<MediaFile[]> {
+    return Array.from(this.mediaFiles.values()).sort((a, b) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bTime - aTime;
+    });
+  }
+
+  async getMediaFile(id: number): Promise<MediaFile | undefined> {
+    return this.mediaFiles.get(id);
+  }
+
+  async createMediaFile(insertFile: InsertMediaFile): Promise<MediaFile> {
+    const id = this.currentMediaFileId++;
+    const file: MediaFile = {
+      ...insertFile,
+      id,
+      altText: insertFile.altText ?? null,
+      createdAt: new Date(),
+    };
+    this.mediaFiles.set(id, file);
+    return file;
+  }
+
+  async deleteMediaFile(id: number): Promise<boolean> {
+    return this.mediaFiles.delete(id);
   }
 }
 
@@ -1009,8 +1303,8 @@ This Support Policy may be updated to reflect changes in our services or support
     return result[0];
   }
 
-  async getAdminUserByAuth0Sub(auth0Sub: string): Promise<AdminUser | undefined> {
-    const result = await this.db.select().from(adminUsers).where(eq(adminUsers.auth0Sub, auth0Sub)).limit(1);
+  async getAdminUserByStytchUserId(stytchUserId: string): Promise<AdminUser | undefined> {
+    const result = await this.db.select().from(adminUsers).where(eq(adminUsers.stytchUserId, stytchUserId)).limit(1);
     return result[0];
   }
 
@@ -1021,6 +1315,15 @@ This Support Policy may be updated to reflect changes in our services or support
 
   async getAllAdminUsers(): Promise<AdminUser[]> {
     return await this.db.select().from(adminUsers);
+  }
+
+  async setAdminUserStytchId(id: number, stytchUserId: string): Promise<AdminUser | undefined> {
+    const result = await this.db
+      .update(adminUsers)
+      .set({ stytchUserId })
+      .where(eq(adminUsers.id, id))
+      .returning();
+    return result[0];
   }
 
   // Company methods
@@ -1114,6 +1417,84 @@ This Support Policy may be updated to reflect changes in our services or support
 
   async deleteLegalDocument(id: number): Promise<boolean> {
     const result = await this.db.delete(legalDocuments).where(eq(legalDocuments.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // About Feature Card methods
+  async getAboutFeatureCards(companyId: number): Promise<AboutFeatureCard[]> {
+    const result = await this.db
+      .select()
+      .from(aboutFeatureCards)
+      .where(eq(aboutFeatureCards.companyId, companyId))
+      .orderBy(aboutFeatureCards.sortOrder);
+    return result;
+  }
+
+  async createAboutFeatureCard(card: InsertAboutFeatureCard): Promise<AboutFeatureCard> {
+    const result = await this.db.insert(aboutFeatureCards).values(card).returning();
+    return result[0];
+  }
+
+  async updateAboutFeatureCard(id: number, updates: Partial<InsertAboutFeatureCard>): Promise<AboutFeatureCard | undefined> {
+    const result = await this.db
+      .update(aboutFeatureCards)
+      .set(updates)
+      .where(eq(aboutFeatureCards.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteAboutFeatureCard(id: number): Promise<boolean> {
+    const result = await this.db.delete(aboutFeatureCards).where(eq(aboutFeatureCards.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Hero Badge methods
+  async getHeroBadges(companyId: number): Promise<HeroBadge[]> {
+    const result = await this.db
+      .select()
+      .from(heroBadges)
+      .where(eq(heroBadges.companyId, companyId))
+      .orderBy(heroBadges.sortOrder);
+    return result;
+  }
+
+  async createHeroBadge(badge: InsertHeroBadge): Promise<HeroBadge> {
+    const result = await this.db.insert(heroBadges).values(badge).returning();
+    return result[0];
+  }
+
+  async updateHeroBadge(id: number, updates: Partial<InsertHeroBadge>): Promise<HeroBadge | undefined> {
+    const result = await this.db
+      .update(heroBadges)
+      .set(updates)
+      .where(eq(heroBadges.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteHeroBadge(id: number): Promise<boolean> {
+    const result = await this.db.delete(heroBadges).where(eq(heroBadges.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Media File methods
+  async getAllMediaFiles(): Promise<MediaFile[]> {
+    return await this.db.select().from(mediaFiles).orderBy(mediaFiles.id);
+  }
+
+  async getMediaFile(id: number): Promise<MediaFile | undefined> {
+    const result = await this.db.select().from(mediaFiles).where(eq(mediaFiles.id, id));
+    return result[0];
+  }
+
+  async createMediaFile(insertFile: InsertMediaFile): Promise<MediaFile> {
+    const result = await this.db.insert(mediaFiles).values(insertFile).returning();
+    return result[0];
+  }
+
+  async deleteMediaFile(id: number): Promise<boolean> {
+    const result = await this.db.delete(mediaFiles).where(eq(mediaFiles.id, id)).returning();
     return result.length > 0;
   }
 }

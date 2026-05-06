@@ -1,0 +1,863 @@
+1. Applicant Identity & Contact Info
+
+Domain: identity_contact
+
+First Name
+
+key: first_name
+
+type: text
+
+required: yes
+
+Middle Name / Initial
+
+key: middle_name
+
+type: text
+
+required: no
+
+Last Name
+
+key: last_name
+
+type: text
+
+required: yes
+
+Preferred Name
+
+key: preferred_name
+
+type: text
+
+required: no
+
+Date of Birth
+
+key: date_of_birth
+
+type: date
+
+required: yes
+
+Age at Start of Camp
+
+key: age_at_start
+
+type: number
+
+required: yes
+
+Gender
+
+key: gender
+
+type: select (e.g., male/female/other)
+
+required: yes
+
+Mailing Address – Street
+
+key: address_street
+
+type: text
+
+required: yes
+
+Mailing Address – City
+
+key: address_city
+
+type: text
+
+required: yes
+
+Mailing Address – State
+
+key: address_state
+
+type: text
+
+required: yes
+
+Mailing Address – Zip
+
+key: address_zip
+
+type: text
+
+required: yes
+
+Primary Phone (Mobile)
+
+key: phone_mobile
+
+type: phone
+
+required: yes
+
+Secondary Phone
+
+key: phone_secondary
+
+type: phone
+
+required: no
+
+Email Address
+
+key: email
+
+type: email
+
+required: yes
+
+Preferred Contact Method
+
+key: preferred_contact_method
+
+type: select (phone/text/email)
+
+required: no
+
+T-Shirt Size
+
+key: tshirt_size
+
+type: select (S/M/L/XL/XXL)
+
+required: no (but required pre-onboarding in real world)
+
+2. Position & Availability
+
+Domain: position_availability
+
+Position(s) Applying For
+
+key: positions_applied_for
+
+type: multiselect (counselor, support staff, kitchen, maintenance, program, leadership, etc.)
+
+required: yes
+
+Willing to Serve in Other Positions if Needed?
+
+key: flexible_position
+
+type: boolean
+
+required: no
+
+Availability Type
+
+key: availability_type
+
+type: select (full_summer, specific_weeks, part_time)
+
+required: yes
+
+Available Start Date
+
+key: available_start_date
+
+type: date
+
+required: yes
+
+Available End Date
+
+key: available_end_date
+
+type: date
+
+required: yes
+
+Specific Sessions / Weeks Available
+
+key: available_sessions
+
+type: textarea or multiselect
+
+required: yes
+
+Previously Served at Dickey Lake Bible Camp?
+
+key: served_here_before
+
+type: boolean
+
+required: yes
+
+If Yes, When and in What Roles?
+
+key: served_here_details
+
+type: textarea
+
+required: if served_here_before is true
+
+3. Emergency Contact & Parent/Guardian
+
+Domain: emergency_contact
+
+Emergency Contact Name
+
+key: emergency_contact_name
+
+type: text
+
+required: yes
+
+Relationship to Applicant
+
+key: emergency_contact_relationship
+
+type: text
+
+required: yes
+
+Emergency Contact Primary Phone
+
+key: emergency_contact_phone
+
+type: phone
+
+required: yes
+
+Emergency Contact Secondary Phone
+
+key: emergency_contact_phone2
+
+type: phone
+
+required: no
+
+Emergency Contact Address
+
+key: emergency_contact_address
+
+type: textarea
+
+required: no
+
+Domain: parent_guardian (conditional if minor)
+
+Parent/Guardian Name
+
+key: guardian_name
+
+type: text
+
+required: if minor
+
+Parent/Guardian Phone
+
+key: guardian_phone
+
+type: phone
+
+required: if minor
+
+Parent/Guardian Email
+
+key: guardian_email
+
+type: email
+
+required: if minor
+
+4. Education & Training
+
+Domain: education_training
+
+Highest Level of Education Completed
+
+key: education_level
+
+type: select (high_school, some_college, college, other)
+
+required: yes
+
+Current School (if student)
+
+key: current_school
+
+type: text
+
+required: no
+
+Major / Area of Study
+
+key: field_of_study
+
+type: text
+
+required: no
+
+Certified in First Aid?
+
+key: cert_first_aid
+
+type: boolean
+
+required: no
+
+Certified in CPR?
+
+key: cert_cpr
+
+type: boolean
+
+required: no
+
+Certified Lifeguard?
+
+key: cert_lifeguard
+
+type: boolean
+
+required: no
+
+Other Relevant Training / Certifications
+
+key: other_training
+
+type: textarea
+
+required: no
+
+5. Work, Ministry, and Camp Experience
+
+Domain: experience
+
+Current/Most Recent Employer Name
+
+key: employment_current_employer
+
+type: text
+
+required: yes (unless explicitly no prior employment)
+
+Job Title / Role
+
+key: employment_current_title
+
+type: text
+
+required: yes
+
+Employment Dates (From–To)
+
+key: employment_current_dates
+
+type: text or date_range
+
+required: yes
+
+Supervisor Name
+
+key: employment_supervisor_name
+
+type: text
+
+required: yes
+
+Supervisor Contact (Phone/Email)
+
+key: employment_supervisor_contact
+
+type: text
+
+required: yes
+
+May We Contact Your Current Employer?
+
+key: employment_may_contact
+
+type: boolean
+
+required: yes
+
+If No, Please Explain
+
+key: employment_contact_explanation
+
+type: textarea
+
+required: if employment_may_contact is false
+
+Prior Camp or Ministry Experience
+
+key: ministry_experience
+
+type: textarea
+
+required: no (but strongly recommended)
+
+Experience Working with Children/Teens
+
+key: youth_experience
+
+type: textarea
+
+required: no (but strongly recommended)
+
+6. Church & Spiritual Life
+
+Domain: church_spiritual
+
+Home Church Name
+
+key: church_name
+
+type: text
+
+required: yes
+
+Church City & State
+
+key: church_location
+
+type: text
+
+required: yes
+
+Pastor / Spiritual Leader Name
+
+key: pastor_name
+
+type: text
+
+required: yes
+
+Pastor Contact (Phone/Email)
+
+key: pastor_contact
+
+type: text
+
+required: yes
+
+Describe How You Became a Follower of Jesus (Testimony)
+
+key: spiritual_testimony
+
+type: textarea
+
+required: yes
+
+Describe Your Current Walk with God
+
+key: spiritual_current_walk
+
+type: textarea
+
+required: yes
+
+Why Do You Want to Serve at Dickey Lake Bible Camp?
+
+key: motivation_serve
+
+type: textarea
+
+required: yes
+
+How Are You Currently Involved in Your Church or Christian Community?
+
+key: church_involvement
+
+type: textarea
+
+required: yes
+
+Strengths / Gifts You Bring to This Ministry
+
+key: spiritual_gifts_strengths
+
+type: textarea
+
+required: no
+
+Areas of Struggle or Growth
+
+key: spiritual_growth_areas
+
+type: textarea
+
+required: no
+
+Have You Read and Do You Agree with the Camp’s Statement of Faith?
+
+key: affirm_statement_of_faith
+
+type: boolean
+
+required: yes
+
+Are You Willing to Abide by DLBC’s Lifestyle and Conduct Standards?
+
+key: affirm_lifestyle_standards
+
+type: boolean
+
+required: yes
+
+7. Skills & Role-Specific Experience
+
+Domain: skills
+
+Comfort Working with Children (Age Groups)
+
+key: skills_age_groups
+
+type: multiselect (7–9, 10–12, teens)
+
+required: no
+
+Outdoor Skills
+
+key: skills_outdoor
+
+type: multiselect (hiking, canoeing, archery, etc.)
+
+required: no
+
+Program Skills
+
+key: skills_program
+
+type: multiselect (music, drama, speaking, leading games, etc.)
+
+required: no
+
+Practical Skills
+
+key: skills_practical
+
+type: multiselect (kitchen, maintenance, cleaning, AV, sound, media)
+
+required: no
+
+8. References
+
+Domain: references
+
+Reference 1 – Name
+
+key: ref1_name
+
+type: text
+
+required: yes
+
+Reference 1 – Relationship
+
+key: ref1_relationship
+
+type: text
+
+required: yes
+
+Reference 1 – Phone
+
+key: ref1_phone
+
+type: phone
+
+required: yes
+
+Reference 1 – Email
+
+key: ref1_email
+
+type: email
+
+required: yes
+
+Reference 2 – Name
+
+key: ref2_name
+
+type: text
+
+required: yes
+
+Reference 2 – Relationship
+
+key: ref2_relationship
+
+type: text
+
+required: yes
+
+Reference 2 – Phone
+
+key: ref2_phone
+
+type: phone
+
+required: yes
+
+Reference 2 – Email
+
+key: ref2_email
+
+type: email
+
+required: yes
+
+Reference 3 – Name
+
+key: ref3_name
+
+type: text
+
+required: no (camp can decide to make this required)
+
+Reference 3 – Relationship
+
+key: ref3_relationship
+
+type: text
+
+required: no
+
+Reference 3 – Phone
+
+key: ref3_phone
+
+type: phone
+
+required: no
+
+Reference 3 – Email
+
+key: ref3_email
+
+type: email
+
+required: no
+
+9. Background, Conduct, and Legal
+
+Domain: background_legal
+
+Ever Been Convicted of a Crime?
+
+key: bg_convicted_crime
+
+type: boolean
+
+required: yes
+
+If Yes, Please Explain
+
+key: bg_convicted_details
+
+type: textarea
+
+required: if bg_convicted_crime is true
+
+Ever Accused or Investigated for Abuse/Misconduct with a Minor?
+
+key: bg_minor_misconduct
+
+type: boolean
+
+required: yes
+
+If Yes, Please Explain
+
+key: bg_minor_misconduct_details
+
+type: textarea
+
+required: if bg_minor_misconduct is true
+
+Ever Been Dismissed or Asked to Resign from a Position Involving Children/Youth?
+
+key: bg_dismissed_youth_role
+
+type: boolean
+
+required: yes
+
+If Yes, Please Explain
+
+key: bg_dismissed_youth_role_details
+
+type: textarea
+
+required: if bg_dismissed_youth_role is true
+
+Currently Use Illegal Drugs?
+
+key: bg_illegal_drugs
+
+type: boolean
+
+required: yes
+
+Abuse of Alcohol or Legal Substances?
+
+key: bg_substance_abuse
+
+type: boolean
+
+required: yes
+
+Background Check Authorization
+
+key: bg_check_authorization
+
+type: boolean (checkbox: “I authorize…”)
+
+required: yes
+
+10. Health & Medical Information
+
+Domain: health_medical
+
+Any Medical Conditions We Should Be Aware Of?
+
+key: med_conditions
+
+type: boolean
+
+required: yes
+
+If Yes, Describe
+
+key: med_conditions_details
+
+type: textarea
+
+required: if med_conditions is true
+
+Allergies (Food/Medicine/Environmental)
+
+key: med_allergies
+
+type: textarea
+
+required: yes
+
+Currently Taking Any Medications?
+
+key: med_on_medications
+
+type: boolean
+
+required: yes
+
+If Yes, List Medications/Dosages
+
+key: med_medications_details
+
+type: textarea
+
+required: if med_on_medications is true
+
+Physical Limitations That May Affect Work at Camp
+
+key: med_physical_limitations
+
+type: textarea
+
+required: yes
+
+Physician Name & Phone
+
+key: med_physician_contact
+
+type: text
+
+required: no
+
+Permission to Seek Emergency Medical Treatment if Needed
+
+key: med_treatment_consent
+
+type: boolean
+
+required: yes
+
+11. Agreements & Final Declarations
+
+Domain: agreements
+
+I Affirm All Information is True and Complete
+
+key: agree_truthful
+
+type: boolean
+
+required: yes
+
+I Understand False Information May Result in Rejection or Dismissal
+
+key: agree_consequences
+
+type: boolean
+
+required: yes
+
+I Agree to Abide by Camp Policies and Leadership
+
+key: agree_policies
+
+type: boolean
+
+required: yes
+
+I Understand This Application Does Not Guarantee a Staff Position
+
+key: agree_no_guarantee
+
+type: boolean
+
+required: yes
+
+Applicant Signature (Typed Name or E-Sign)
+
+key: signature_applicant
+
+type: text
+
+required: yes
+
+Date Signed
+
+key: signature_date
+
+type: date
+
+required: yes
+
+For Minors:
+
+Parent/Guardian Consent to Serve, Policies, and Emergency Treatment
+
+key: guardian_consent
+
+type: boolean
+
+required: if minor
+
+Parent/Guardian Signature
+
+key: guardian_signature
+
+type: text
+
+required: if minor
+
+Parent/Guardian Signature Date
+
+key: guardian_signature_date
+
+type: date
+
+required: if minor

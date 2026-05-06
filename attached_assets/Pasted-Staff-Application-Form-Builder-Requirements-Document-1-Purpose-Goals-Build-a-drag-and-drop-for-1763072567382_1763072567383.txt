@@ -1,0 +1,587 @@
+Staff Application Form Builder – Requirements Document
+1. Purpose & Goals
+
+Build a drag-and-drop form builder for staff applications that:
+
+Uses both existing staff database fields and custom fields.
+
+Supports multi-page / multi-section application flows.
+
+Allows applicants to save progress and resume later.
+
+Stores all form definitions and responses in Postgres, in a way that’s:
+
+Reviewable (view per staff member)
+
+Reportable (query/filter/export by fields)
+
+Editable (admin can update forms and re-open applications)
+
+Tracks application status from in-progress to approved.
+
+This feature will be used initially for Dickey Lake Bible Camp staff applications, but should be generic enough for other camps or programs.
+
+2. User Roles
+
+Admin / Form Builder
+
+Creates and edits application form templates.
+
+Uses drag-and-drop UI to build pages, sections, and fields.
+
+Maps fields to existing staff attributes or creates custom fields.
+
+Publishes forms for use in staff application flows.
+
+Applicant (Staff Candidate)
+
+Fills out an application based on a published form.
+
+Can save progress and resume later.
+
+Submits the application once complete.
+
+Staff Reviewer / Admin
+
+Views individual applications and all captured responses.
+
+Sees status (in-progress, pending, approved, etc.).
+
+Approves or rejects applications.
+
+Views application data attached to a staff profile.
+
+3. Core Concepts
+3.1 Form Template
+
+A Form Template represents one version of a staff application (e.g., “2026 Summer Staff Application”).
+
+Contains:
+
+Metadata: name, description, version, active flag.
+
+Layout: ordered list of pages.
+
+Pages contain sections.
+
+Sections contain fields (existing or custom).
+
+Stored as JSONB in Postgres to keep drag-and-drop structure.
+
+3.2 Fields
+
+Two types of fields:
+
+Bound Fields (Existing Staff Fields)
+
+Mapped directly to columns on the staff table (or equivalent).
+
+Example: first_name, last_name, date_of_birth, email, phone, etc.
+
+When the application is submitted, values for these fields must be written/updated on the staff record.
+
+Custom Fields (Form-Specific)
+
+Defined inside the form template.
+
+Example: “How did you become a Christian?”, “Why do you want to work at camp?”
+
+Stored as key-value pairs in a structured JSONB response with reference to the field ID.
+
+Each field has:
+
+id (stable UUID, used as key in responses)
+
+label
+
+description / help text (optional)
+
+type (see 3.3)
+
+required (bool)
+
+options (for select/radio/checkbox)
+
+default_value (optional)
+
+Validation rules (min/max length, numeric range, regex, etc.)
+
+For bound fields:
+
+bound_entity (e.g., "staff")
+
+bound_field (e.g., "first_name")
+
+3.3 Field Types
+
+At minimum:
+
+Text (single line)
+
+Textarea (multi-line)
+
+Number
+
+Date
+
+DateTime
+
+Email
+
+Phone
+
+Dropdown (single-select)
+
+Radio buttons
+
+Checkbox (single)
+
+Checkbox group (multi-select)
+
+Yes/No (boolean)
+
+File upload (if needed later – can be stubbed now)
+
+Paragraph / display-only text (no response, just content)
+
+4. UI Requirements – Form Builder
+4.1 Layout
+
+Main body (center) – the form canvas
+
+Displays pages in order.
+
+Each page shows its sections and fields.
+
+Drag-and-drop support to:
+
+Reorder fields within sections.
+
+Move fields between sections.
+
+Reorder sections within a page.
+
+Reorder pages.
+
+Right-hand panel – field toolbox & field configuration
+
+Toolbox of field types:
+
+“Existing Staff Fields” (pulled from schema)
+
+“Custom Fields” (generic types)
+
+Clicking or dragging a field type into the main body:
+
+Adds new field to selected section.
+
+Clicking a field on the canvas opens field settings in this panel:
+
+Label, help text, required, type-specific options, validation.
+
+For bound fields: show which staff property is mapped.
+
+4.2 Pages & Sections
+
+Admin can:
+
+Add new pages.
+
+Add sections within a page.
+
+Set section titles and descriptions.
+
+Optionally mark a section as “collapsible” in the UI (if implemented).
+
+4.3 Existing Staff Field Picker
+
+In the toolbox, there should be a “Staff Fields” group:
+
+Populated from a configuration mapping the staff DB schema to UI fields.
+
+Each staff field can be dragged onto the form to create a bound field.
+
+Prevent adding the same bound field multiple times in the same form, or handle duplicates with a clear rule (e.g., “last one wins”).
+
+4.4 Form Template Management
+
+Admin UI:
+
+List of existing form templates (name, created_at, active/inactive).
+
+Create new template.
+
+Edit existing template (with versioning approach described below).
+
+Clone an existing template (e.g., create 2027 based on 2026).
+
+Mark template as:
+
+draft (not visible to applicants),
+
+published (available to new applicants),
+
+archived (no new applications, but existing data retained).
+
+5. Applicant Experience
+5.1 Application Start
+
+Applicant hits a “Start Application” URL linked to a specific published form template.
+
+If authentication exists, attach to logged-in user; if not, support:
+
+Email + magic link, or
+
+Temporary token for resume (at minimum: store stable application_token).
+
+When a new application is created:
+
+Create a new staff_application record with:
+
+id
+
+staff_id (if known / existing account)
+
+form_template_id
+
+status = 'in_progress'
+
+current_page_index = 0
+
+created_at, updated_at
+
+5.2 Pagination & Navigation
+
+Each page of the form:
+
+Shows sections and fields for that page.
+
+Has Next and Back buttons.
+
+Admin can configure:
+
+Whether pages are required to be completed in order.
+
+Whether the applicant can jump to any completed page via navigation.
+
+5.3 Autosave / Save-on-Page
+
+On every page navigation (“Next” or “Save & Exit”):
+
+Save all field values for that page.
+
+Validate required fields on that page.
+
+Update:
+
+current_page_index
+
+last_saved_at
+
+Optionally implement auto-save on a time interval or field blur, but minimum requirement: save on Next / Save button.
+
+5.4 Resume Function
+
+Applicants can resume using:
+
+Login/session, OR
+
+A secure “resume link” with token.
+
+On resume:
+
+Load staff_application by id or token.
+
+Load form template and existing responses.
+
+Start on current_page_index, with fields pre-filled from saved responses.
+
+5.5 Submission
+
+On final page:
+
+Validate all required fields across all pages.
+
+If valid:
+
+Set application status = 'submitted' or status = 'pending' (configurable text).
+
+Lock editing for applicant (unless reopened by admin).
+
+For bound fields, write data into the staff table (create or update staff record).
+
+If invalid:
+
+Indicate missing/invalid fields and keep on current page.
+
+6. Application Status & Lifecycle
+6.1 Status Values
+
+Minimum:
+
+in_progress – applicant started but not finished.
+
+submitted (or pending) – applicant completed and submitted; waiting for review.
+
+under_review – admin is reviewing.
+
+approved – accepted as staff.
+
+rejected – not accepted.
+
+withdrawn – applicant withdrew.
+
+(Optional) incomplete – for stale, never-submitted apps (can be derived from in_progress + date threshold).
+
+6.2 Transitions
+
+in_progress → submitted
+
+submitted → under_review
+
+under_review → approved / rejected
+
+At any point (admin): → withdrawn
+
+Admin may also:
+
+Return an application to in_progress and unlock editing (with a comment) if revision is needed.
+
+6.3 Logging
+
+Log status changes with:
+
+application_id
+
+old_status
+
+new_status
+
+changed_by (admin or system)
+
+changed_at
+
+Optional note.
+
+7. Data Model – Postgres (Proposed)
+
+You don’t have to follow this exact schema, but it should be functionally equivalent.
+
+7.1 Form Templates
+CREATE TABLE form_templates (
+  id UUID PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  version INTEGER NOT NULL DEFAULT 1,
+  status TEXT NOT NULL CHECK (status IN ('draft', 'published', 'archived')),
+  schema JSONB NOT NULL, -- pages/sections/fields structure
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+
+schema JSONB structure (conceptual):
+
+{
+  "pages": [
+    {
+      "id": "page-1",
+      "title": "Contact Info",
+      "sections": [
+        {
+          "id": "section-1",
+          "title": "Basic Info",
+          "fields": [
+            {
+              "id": "field-uuid-1",
+              "label": "First Name",
+              "type": "text",
+              "required": true,
+              "bound_entity": "staff",
+              "bound_field": "first_name"
+            },
+            {
+              "id": "field-uuid-2",
+              "label": "Email",
+              "type": "email",
+              "required": true,
+              "bound_entity": "staff",
+              "bound_field": "email"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+7.2 Staff Applications
+CREATE TABLE staff_applications (
+  id UUID PRIMARY KEY,
+  staff_id UUID NULL, -- link to staff record if exists
+  form_template_id UUID NOT NULL REFERENCES form_templates(id),
+  applicant_identifier TEXT, -- email or external ID, optional
+  status TEXT NOT NULL CHECK (
+    status IN ('in_progress', 'submitted', 'under_review', 'approved', 'rejected', 'withdrawn')
+  ),
+  current_page_index INTEGER NOT NULL DEFAULT 0,
+  last_saved_at TIMESTAMP NOT NULL DEFAULT now(),
+  submitted_at TIMESTAMP NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  resume_token TEXT UNIQUE NULL -- for "resume link" flow
+);
+
+7.3 Application Responses
+CREATE TABLE staff_application_responses (
+  id UUID PRIMARY KEY,
+  application_id UUID NOT NULL REFERENCES staff_applications(id) ON DELETE CASCADE,
+  -- JSON object of field_id -> value
+  responses JSONB NOT NULL,
+  -- optional denormalization for faster queries later:
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+
+Notes:
+
+responses could be:
+
+{
+  "field-uuid-1": "Todd",
+  "field-uuid-2": "todd@example.com",
+  "field-uuid-3": "My testimony...",
+  "field-uuid-4": true
+}
+
+
+If you want per-page saving, you can either:
+
+Store a single responses JSONB object and merge on each save, or
+
+Add a page_index field and one row per page, and aggregate on load.
+
+7.4 Status Log (Optional but Recommended)
+CREATE TABLE staff_application_status_log (
+  id UUID PRIMARY KEY,
+  application_id UUID NOT NULL REFERENCES staff_applications(id) ON DELETE CASCADE,
+  old_status TEXT,
+  new_status TEXT NOT NULL,
+  changed_by UUID NULL, -- admin user id
+  note TEXT,
+  changed_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+8. Mapping to Staff Table
+8.1 Bound Fields Behavior
+
+When an application is submitted or approved (configurable trigger), the system should:
+
+Collect all fields where bound_entity = 'staff'.
+
+Build an update object for staff table (create if new, update if existing).
+
+Write to staff record.
+
+If staff_id is not set yet:
+
+Check if a staff record can be matched (e.g., by email).
+
+If no match, create new staff record and set staff_applications.staff_id.
+
+8.2 Editing After Approval
+
+Staff reviewers should be able to view application data on the staff profile page:
+
+A tab “Applications” listing each application (with status).
+
+Ability to open an application and see all responses in read-only mode.
+
+Optionally:
+
+Allow admins to edit certain fields on staff record directly (not necessarily editing the original application).
+
+9. Reporting Requirements
+
+Must be able to:
+
+List applications by status, form template, and date range.
+
+Filter applications by:
+
+Basic bound fields (name, email, etc.).
+
+Custom fields (via JSONB queries).
+
+Export application data to CSV/Excel.
+
+Implementation detail:
+
+Use JSONB indexing if necessary:
+
+CREATE INDEX ON staff_application_responses USING GIN (responses);
+
+Provide an internal utility function or API to query by responses -> 'field-uuid'.
+
+10. API Endpoints (High-Level)
+
+You can implement however you want, but something like:
+
+Form Builder
+
+GET /api/form-templates
+
+POST /api/form-templates (create)
+
+PUT /api/form-templates/:id (update schema, metadata)
+
+POST /api/form-templates/:id/publish
+
+POST /api/form-templates/:id/archive
+
+Application Flow
+
+POST /api/applications (start new, returns app id and resume token if needed)
+
+GET /api/applications/:id (load template + current responses)
+
+PUT /api/applications/:id/responses (save page responses + current_page_index)
+
+POST /api/applications/:id/submit (validate + set status)
+
+GET /api/applications/resume/:resume_token (resolve to application id)
+
+Admin / Review
+
+GET /api/admin/applications (listing with filters)
+
+GET /api/admin/applications/:id (full response + metadata)
+
+POST /api/admin/applications/:id/status (change status, log, etc.)
+
+11. Non-Functional Requirements
+
+Database: Postgres.
+
+Transactions: Submission and staff record updates should be wrapped in a transaction to avoid partial writes.
+
+Security:
+
+Resume token must be random and unguessable.
+
+Applications should be tied to user accounts where possible.
+
+Admin endpoints must be authenticated and authorized.
+
+Validation:
+
+Field-level validation enforced both on front-end and back-end.
+
+Extensibility:
+
+Future ability to:
+
+Add file upload fields (storing files in S3/object storage with only URLs in DB).
+
+Add new field types without breaking existing templates.
