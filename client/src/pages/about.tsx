@@ -105,7 +105,7 @@ export default function AboutPage() {
                 camp management to faith-based camps and youth organizations.
                 Several other platforms — across lawn care, restaurants,
                 property management, automotive repair, accounting, and career
-                services — are in active development.
+                services — are in active development or acquisition.
               </p>
             </div>
           </div>
