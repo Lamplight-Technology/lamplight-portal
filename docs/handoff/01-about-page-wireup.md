@@ -46,7 +46,7 @@ Add `import { Link } from "wouter";` and `import { ArrowRight } from "lucide-rea
 ## Acceptance
 
 - [ ] `https://llt.llc/about` (after deploy) renders the dedicated About page, not a homepage scroll.
-- [ ] All four sections render: hero, What We Do, How We Work, Our Why with the *"Our faith shapes our character, not our customer list"* line intact, and the CTA section.
+- [ ] All four sections render: hero, What We Do, How We Work, Our Why (first-person founder voice, signed "— Todd Adams, Founder", with the pull-quote *"We build for clients of every background. We hire for character and craft. Our faith shapes our character, not our customer list — and not our hiring criteria."* intact), and the CTA section.
 - [ ] "Learn more about Lamplight" link on the homepage navigates to `/about` (not a scroll-to-anchor).
 - [ ] `npm run check` passes.
 - [ ] Mobile layout at ~375px is clean.

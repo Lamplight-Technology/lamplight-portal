@@ -11,7 +11,7 @@
 ## About page (task 01)
 
 - [ ] `https://llt.llc/about` renders the dedicated About page (not a homepage scroll).
-- [ ] All four sections render: hero, What We Do, How We Work, Our Why with *"Our faith shapes our character, not our customer list"* intact, CTA section.
+- [ ] All four sections render: hero, What We Do, How We Work, Our Why (first-person founder voice, signed "— Todd Adams, Founder", with the pull-quote *"We build for clients of every background. We hire for character and craft. Our faith shapes our character, not our customer list — and not our hiring criteria."* intact), CTA section.
 - [ ] "Learn more about Lamplight" link on the homepage navigates to `/about`.
 
 ## Routing & SPA

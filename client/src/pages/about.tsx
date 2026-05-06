@@ -167,16 +167,18 @@ export default function AboutPage() {
             </div>
             <div className="space-y-5 text-lg text-blue-100 leading-relaxed pl-0 md:pl-20">
               <p>
-                Our team shares a Christian faith that shapes how we
-                operate — with integrity, humility, and a long-term view of
-                the people our software serves. It&apos;s why we won&apos;t
-                ship things we can&apos;t stand behind, why we treat customers
-                and team members with respect regardless of background, and
-                why we believe business done well is a form of service.
+                I founded Lamplight on a Christian faith that shapes how I
+                lead and how the company operates — with integrity, humility,
+                and a long-term view of the people our software serves.
+                It&apos;s why we won&apos;t ship things we can&apos;t stand
+                behind, why we treat customers and team members with respect
+                regardless of background, and why I believe business done well
+                is a form of service.
               </p>
               <p className="text-xl md:text-2xl font-light italic text-white border-l-4 border-amber-400 pl-6 my-8">
-                We build for clients of every background. Our faith shapes our
-                character, not our customer list.
+                We build for clients of every background. We hire for
+                character and craft. Our faith shapes our character, not our
+                customer list — and not our hiring criteria.
               </p>
               <p>
                 Practically, that means we sweat the small stuff: clear
@@ -185,6 +187,11 @@ export default function AboutPage() {
                 doesn&apos;t fit. If you&apos;re evaluating us, that&apos;s
                 what you should expect.
               </p>
+              <div className="mt-10 pt-6 border-t border-blue-400/20">
+                <p className="text-blue-200 text-base" data-testid="text-about-signature">
+                  &mdash; <span className="text-white font-semibold">Todd Adams</span>, Founder
+                </p>
+              </div>
             </div>
           </div>
         </section>

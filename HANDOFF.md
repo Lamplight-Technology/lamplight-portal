@@ -46,7 +46,15 @@ In `platforms`:
 
 ## 2. The repositioning principle (immutable)
 
-Faith lives at the **operating-ethos layer**, not the **audience layer**. The homepage reads as a credible SaaS holding company in operator voice; the About page is where faith is stated explicitly. Don't reintroduce faith framing into the homepage hero or audience descriptors. The line *"Our faith shapes our character, not our customer list"* on the About page is the load-bearing sentence — don't paraphrase it.
+Faith lives at the **operating-ethos layer**, not the **audience layer**. The homepage reads as a credible SaaS holding company in operator voice; the About page is where faith is stated explicitly. Don't reintroduce faith framing into the homepage hero or audience descriptors.
+
+The "Our Why" section on the About page is in **first-person founder voice** (Todd Adams, signed at the end). The faith claim is anchored to the founder, not to the entire team — this is intentional, both for authenticity and to avoid the implication that hiring is faith-screened. Don't shift it back to "Our team shares a Christian faith…" framing.
+
+The load-bearing pull-quote on the About page is:
+
+> *"We build for clients of every background. We hire for character and craft. Our faith shapes our character, not our customer list — and not our hiring criteria."*
+
+Don't paraphrase, soften, or shorten it. The "and not our hiring criteria" half is doing real work — it removes the "Christians-only employer" reading.
 
 ---
 
@@ -90,7 +98,8 @@ npm run check     # tsc — must pass at every step before moving on
 - Don't say "faith-based and traditional businesses" anywhere.
 - Don't paraphrase "Grounded in integrity, humility, purpose, and values." — it's already calibrated.
 - Footer tagline is "Built with purpose. Operated with integrity." Leave it.
-- The line "Our faith shapes our character, not our customer list." is load-bearing. Don't soften, don't qualify, don't move.
+- The pull-quote on the About page (*"…not our customer list — and not our hiring criteria."*) is load-bearing. Don't soften, don't qualify, don't move.
+- The About page "Our Why" section is in first-person founder voice and signed "— Todd Adams, Founder." Don't switch it to corporate "we" voice.
 
 ---
 
