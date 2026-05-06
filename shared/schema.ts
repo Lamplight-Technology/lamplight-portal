@@ -36,6 +36,7 @@ export const companies = pgTable("companies", {
   aboutSectionLabel: text("about_section_label").default("Why Choose Us"),
   aboutTitle: text("about_title").notNull(),
   aboutDescription: text("about_description").notNull(),
+  aboutPullQuote: text("about_pull_quote"),
   aboutCardsLayout: text("about_cards_layout").default("3-col"),
   platformsSectionLabel: text("platforms_section_label").default("Our Solutions"),
   platformsTitle: text("platforms_title"),

@@ -150,6 +150,29 @@ export default function Home() {
                 );
               })}
             </div>
+
+            {/* Values pull-quote — bookends the section beneath the pillar cards */}
+            {company?.aboutPullQuote && (
+              <div className="mt-16 md:mt-20 flex justify-center">
+                <div className="relative max-w-3xl text-center">
+                  <div
+                    aria-hidden="true"
+                    className="absolute -top-6 left-1/2 -translate-x-1/2 text-7xl text-blue-200/70 font-serif leading-none select-none"
+                  >
+                    &ldquo;
+                  </div>
+                  <p
+                    className="relative text-2xl md:text-3xl font-light italic text-slate-700 leading-relaxed px-6"
+                    data-testid="text-about-pull-quote"
+                  >
+                    {company.aboutPullQuote}
+                  </p>
+                  <div className="mt-4 flex justify-center">
+                    <div className="h-px w-16 bg-gradient-to-r from-transparent via-blue-400/50 to-transparent"></div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </section>
         </>
