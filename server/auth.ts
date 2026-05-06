@@ -11,6 +11,7 @@ declare module "express-session" {
       email: string;
       name?: string | null;
     };
+    postLoginRedirect?: string;
   }
 }
 
@@ -88,10 +89,16 @@ export function setupAuth(app: Express, baseURL: string) {
       return res.json({ ok: true });
     }
 
-    const redirectTarget = sanitizeRedirect(req.body?.redirect);
-    const callbackURL = `${baseURL}/api/auth/callback?redirect=${encodeURIComponent(redirectTarget)}`;
+    // Stash the post-login redirect in the session — Stytch URL validation
+    // rejects callback URLs whose query params aren't in the dashboard allowlist,
+    // so we keep the magic link URL clean and read the target back in /callback.
+    req.session.postLoginRedirect = sanitizeRedirect(req.body?.redirect);
+    const callbackURL = `${baseURL}/api/auth/callback`;
 
     try {
+      await new Promise<void>((resolve, reject) =>
+        req.session.save((err) => (err ? reject(err) : resolve())),
+      );
       await stytchClient!.magicLinks.email.loginOrCreate({
         email,
         login_magic_link_url: callbackURL,
@@ -108,7 +115,7 @@ export function setupAuth(app: Express, baseURL: string) {
   app.get("/api/auth/callback", async (req: Request, res: Response) => {
     const token = typeof req.query.token === "string" ? req.query.token : "";
     const tokenType = typeof req.query.stytch_token_type === "string" ? req.query.stytch_token_type : "magic_links";
-    const redirectTarget = sanitizeRedirect(req.query.redirect);
+    const redirectTarget = sanitizeRedirect(req.session.postLoginRedirect);
 
     if (!token) {
       return res.redirect("/?auth_error=missing_token");
@@ -141,6 +148,7 @@ export function setupAuth(app: Express, baseURL: string) {
         email,
         name: adminUser?.name ?? null,
       };
+      delete req.session.postLoginRedirect;
 
       return req.session.save((err) => {
         if (err) {
