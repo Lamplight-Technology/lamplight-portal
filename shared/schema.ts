@@ -84,6 +84,7 @@ export const platforms = pgTable("platforms", {
   link: text("link").notNull(),
   logo: text("logo"),
   isActive: boolean("is_active").default(true),
+  comingSoon: boolean("coming_soon").default(false),
   sortOrder: integer("sort_order").default(0),
 });
 

@@ -12,6 +12,10 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      {/* Anchor-section deep links — render Home; the page reads the path and scrolls to the matching section */}
+      <Route path="/about" component={Home} />
+      <Route path="/platforms" component={Home} />
+      <Route path="/contact" component={Home} />
       <Route path="/admin" component={AdminPage} />
       <Route path="/legal/:type" component={LegalDocumentPage} />
       <Route component={NotFound} />

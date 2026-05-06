@@ -44,6 +44,25 @@ export default function Home() {
     queryClient.invalidateQueries({ queryKey: ["/api/user"] });
   }, []);
 
+  // If the user landed on /about, /platforms, or /contact directly, scroll to the matching section
+  // once the page content is loaded. Wait one tick for the anchors to render.
+  useEffect(() => {
+    if (companyLoading || platformsLoading) return;
+    const path = window.location.pathname.replace(/\/$/, "");
+    const anchorMap: Record<string, string> = {
+      "/about": "about",
+      "/platforms": "platforms",
+      "/contact": "contact",
+    };
+    const sectionId = anchorMap[path];
+    if (!sectionId) return;
+    // RAF gives the layout a frame to settle before measuring scroll positions.
+    requestAnimationFrame(() => {
+      const el = document.getElementById(sectionId);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [companyLoading, platformsLoading]);
+
   useEffect(() => {
     if (!isAuthenticated && showAdmin) {
       setShowAdmin(false);
