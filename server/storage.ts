@@ -6,6 +6,7 @@ import {
   aboutFeatureCards,
   heroBadges,
   mediaFiles,
+  contactSubmissions,
   type Company,
   type Platform,
   type AdminUser,
@@ -13,6 +14,7 @@ import {
   type AboutFeatureCard,
   type HeroBadge,
   type MediaFile,
+  type ContactSubmission,
   type InsertCompany,
   type InsertPlatform,
   type InsertAdminUser,
@@ -20,10 +22,11 @@ import {
   type InsertAboutFeatureCard,
   type InsertHeroBadge,
   type InsertMediaFile,
+  type InsertContactSubmission,
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Admin user methods
@@ -69,6 +72,12 @@ export interface IStorage {
   getMediaFile(id: number): Promise<MediaFile | undefined>;
   createMediaFile(file: InsertMediaFile): Promise<MediaFile>;
   deleteMediaFile(id: number): Promise<boolean>;
+
+  // Contact submission methods
+  createContactSubmission(data: InsertContactSubmission): Promise<ContactSubmission>;
+  markNotificationSent(id: number): Promise<void>;
+  markConfirmationSent(id: number): Promise<void>;
+  listContactSubmissions(): Promise<ContactSubmission[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -139,6 +148,7 @@ export class MemStorage implements IStorage {
       heroBlobColor3: "#6366f1",
       aboutTitle: "Building the Future of Software",
       aboutDescription: "With a portfolio of innovative SaaS platforms, Lamplight Technology drives digital transformation across industries. Our mission is to create powerful, scalable solutions that enable businesses to thrive in an increasingly connected world.",
+      aboutPullQuote: null,
       platformsTitle: "Our SaaS Platforms",
       platformsDescription: "Discover our platforms and services",
       contactTitle: "Get in Touch",
@@ -172,6 +182,7 @@ export class MemStorage implements IStorage {
         link: "https://collabflow.lamplighttech.com",
         logo: "https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
         isActive: true,
+        comingSoon: false,
         sortOrder: 1,
       },
       {
@@ -182,6 +193,7 @@ export class MemStorage implements IStorage {
         link: "https://financeiq.lamplighttech.com",
         logo: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
         isActive: true,
+        comingSoon: false,
         sortOrder: 2,
       },
       {
@@ -192,6 +204,7 @@ export class MemStorage implements IStorage {
         link: "https://servicedeskpro.lamplighttech.com",
         logo: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
         isActive: true,
+        comingSoon: false,
         sortOrder: 3,
       },
       {
@@ -202,6 +215,7 @@ export class MemStorage implements IStorage {
         link: "https://marketflow.lamplighttech.com",
         logo: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
         isActive: true,
+        comingSoon: false,
         sortOrder: 4,
       },
       {
@@ -212,6 +226,7 @@ export class MemStorage implements IStorage {
         link: "https://talenthub.lamplighttech.com",
         logo: "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
         isActive: true,
+        comingSoon: false,
         sortOrder: 5,
       },
       {
@@ -222,6 +237,7 @@ export class MemStorage implements IStorage {
         link: "https://retailengine.lamplighttech.com",
         logo: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
         isActive: true,
+        comingSoon: false,
         sortOrder: 6,
       },
     ];
@@ -713,7 +729,8 @@ This Support Policy may be updated to reflect changes in our services or support
       showPlatforms: insertCompany.showPlatforms ?? null,
       showAbout: insertCompany.showAbout ?? null,
       showContact: insertCompany.showContact ?? null,
-      id 
+      aboutPullQuote: insertCompany.aboutPullQuote ?? null,
+      id
     };
     this.companies.set(id, company);
     return company;
@@ -746,10 +763,11 @@ This Support Policy may be updated to reflect changes in our services or support
 
   async createPlatform(insertPlatform: InsertPlatform): Promise<Platform> {
     const id = this.currentPlatformId++;
-    const platform: Platform = { 
+    const platform: Platform = {
       ...insertPlatform,
       logo: insertPlatform.logo ?? null,
       isActive: insertPlatform.isActive ?? null,
+      comingSoon: insertPlatform.comingSoon ?? false,
       id,
       sortOrder: insertPlatform.sortOrder ?? id
     };
@@ -905,6 +923,44 @@ This Support Policy may be updated to reflect changes in our services or support
 
   async deleteMediaFile(id: number): Promise<boolean> {
     return this.mediaFiles.delete(id);
+  }
+
+  // Contact submission methods (in-memory)
+  private contactSubmissions: Map<number, ContactSubmission> = new Map();
+  private currentContactSubmissionId: number = 1;
+
+  async createContactSubmission(data: InsertContactSubmission): Promise<ContactSubmission> {
+    const id = this.currentContactSubmissionId++;
+    const submission: ContactSubmission = {
+      ...data,
+      id,
+      company: data.company ?? null,
+      ipAddress: data.ipAddress ?? null,
+      userAgent: data.userAgent ?? null,
+      notificationSent: false,
+      confirmationSent: false,
+      createdAt: new Date(),
+    };
+    this.contactSubmissions.set(id, submission);
+    return submission;
+  }
+
+  async markNotificationSent(id: number): Promise<void> {
+    const s = this.contactSubmissions.get(id);
+    if (s) this.contactSubmissions.set(id, { ...s, notificationSent: true });
+  }
+
+  async markConfirmationSent(id: number): Promise<void> {
+    const s = this.contactSubmissions.get(id);
+    if (s) this.contactSubmissions.set(id, { ...s, confirmationSent: true });
+  }
+
+  async listContactSubmissions(): Promise<ContactSubmission[]> {
+    return Array.from(this.contactSubmissions.values()).sort((a, b) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bTime - aTime;
+    });
   }
 }
 
@@ -1496,6 +1552,33 @@ This Support Policy may be updated to reflect changes in our services or support
   async deleteMediaFile(id: number): Promise<boolean> {
     const result = await this.db.delete(mediaFiles).where(eq(mediaFiles.id, id)).returning();
     return result.length > 0;
+  }
+
+  // Contact submission methods
+  async createContactSubmission(data: InsertContactSubmission): Promise<ContactSubmission> {
+    const result = await this.db.insert(contactSubmissions).values(data).returning();
+    return result[0];
+  }
+
+  async markNotificationSent(id: number): Promise<void> {
+    await this.db
+      .update(contactSubmissions)
+      .set({ notificationSent: true })
+      .where(eq(contactSubmissions.id, id));
+  }
+
+  async markConfirmationSent(id: number): Promise<void> {
+    await this.db
+      .update(contactSubmissions)
+      .set({ confirmationSent: true })
+      .where(eq(contactSubmissions.id, id));
+  }
+
+  async listContactSubmissions(): Promise<ContactSubmission[]> {
+    return await this.db
+      .select()
+      .from(contactSubmissions)
+      .orderBy(desc(contactSubmissions.createdAt));
   }
 }
 

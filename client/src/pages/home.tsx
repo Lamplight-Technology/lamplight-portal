@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { queryClient } from "@/lib/queryClient";
 import Navigation from "@/components/navigation";
 import HeroSection from "@/components/hero-section";
@@ -7,10 +8,11 @@ import PlatformCard from "@/components/platform-card";
 import AdminPanel from "@/components/admin-panel";
 import AccessDenied from "@/components/access-denied";
 import Footer from "@/components/footer";
+import ContactForm from "@/components/contact-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import * as Icons from "lucide-react";
-import { ChartLine, Shield, Users } from "lucide-react";
+import { ChartLine, Shield, Users, ArrowRight } from "lucide-react";
 import type { Company, Platform, AboutFeatureCard, HeroBadge } from "@shared/schema";
 
 export default function Home() {
@@ -50,7 +52,6 @@ export default function Home() {
     if (companyLoading || platformsLoading) return;
     const path = window.location.pathname.replace(/\/$/, "");
     const anchorMap: Record<string, string> = {
-      "/about": "about",
       "/platforms": "platforms",
       "/contact": "contact",
     };
@@ -173,6 +174,17 @@ export default function Home() {
                 </div>
               </div>
             )}
+
+            <div className="mt-12 text-center">
+              <Link
+                href="/about"
+                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+                data-testid="link-about-more"
+              >
+                Learn more about Lamplight
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
         </section>
         </>
@@ -216,8 +228,8 @@ export default function Home() {
           <div className="absolute top-10 right-10 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
           <div className="absolute bottom-10 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
           
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="text-center">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="text-center mb-12">
               <div className="inline-block">
                 <div className="text-sm font-semibold text-blue-400 mb-3 tracking-wide uppercase">
                   {company?.contactSectionLabel || "Let's Connect"}
@@ -226,21 +238,46 @@ export default function Home() {
                   {company?.contactTitle || "Get in Touch"}
                 </h2>
               </div>
-              <p className="text-xl text-blue-100 mb-12 leading-relaxed max-w-2xl mx-auto">
+              <p className="text-xl text-blue-100 leading-relaxed max-w-2xl mx-auto">
                 {company?.contactDescription || "Ready to transform your business with our SaaS platforms? Our team is here to help you get started."}
               </p>
-              <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                <Button 
-                  className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-10 py-6 text-lg shadow-xl shadow-blue-500/50 hover:shadow-2xl hover:shadow-blue-500/60 transition-all duration-300"
-                  asChild
-                  data-testid="button-contact-us"
-                  size="lg"
-                >
-                  <a href={`mailto:${company?.contactEmail || 'info@example.com'}`}>
-                    {company?.contactButtonText || "Contact Us"}
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-10 lg:gap-16 items-start">
+              <div className="text-blue-100">
+                <h3 className="text-2xl font-semibold text-white mb-4">Tell us a bit about your project.</h3>
+                <p className="leading-relaxed mb-6">
+                  Whether you're exploring one of our platforms, looking for help adopting AI, or interested in
+                  partnership — start a conversation. We read every message.
+                </p>
+                <ul className="space-y-3 text-sm">
+                  <li className="flex items-start gap-2">
+                    <span aria-hidden className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-blue-300" />
+                    We respond within 1–2 business days.
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span aria-hidden className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-blue-300" />
+                    Real humans, not autoresponders.
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span aria-hidden className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-blue-300" />
+                    Your info isn't shared with anyone.
+                  </li>
+                </ul>
+                <p className="mt-8 text-sm text-blue-200/90">
+                  Prefer email? Reach us directly at{" "}
+                  <a
+                    href={`mailto:${company?.contactEmail || "info@llt.llc"}`}
+                    className="font-semibold text-white hover:text-blue-200 underline underline-offset-4"
+                    data-testid="link-contact-mailto"
+                  >
+                    {company?.contactEmail || "info@llt.llc"}
                   </a>
-                </Button>
+                  .
+                </p>
               </div>
+
+              <ContactForm />
             </div>
           </div>
         </section>

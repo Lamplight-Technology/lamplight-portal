@@ -1,7 +1,8 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertCompanySchema, insertPlatformSchema, insertLegalDocumentSchema, insertAboutFeatureCardSchema, insertHeroBadgeSchema, insertMediaFileSchema } from "@shared/schema";
+import { insertCompanySchema, insertPlatformSchema, insertLegalDocumentSchema, insertAboutFeatureCardSchema, insertHeroBadgeSchema, insertMediaFileSchema, insertContactSubmissionSchema } from "@shared/schema";
+import { sendContactNotification, sendContactConfirmation } from "./email";
 import { z } from "zod";
 import OpenAI from "openai";
 import * as cheerio from "cheerio";
@@ -771,6 +772,78 @@ Be concise and professional.`
       res.json({ message: "Media file deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete media file" });
+    }
+  });
+
+  // Contact form: in-memory rate limit, 5 submissions per IP per hour.
+  // Single-instance deployment — fine for now.
+  const submissionLog = new Map<string, number[]>();
+  function isRateLimited(ip: string): boolean {
+    const now = Date.now();
+    const hourAgo = now - 60 * 60 * 1000;
+    const recent = (submissionLog.get(ip) ?? []).filter(t => t > hourAgo);
+    if (recent.length >= 5) {
+      submissionLog.set(ip, recent);
+      return true;
+    }
+    recent.push(now);
+    submissionLog.set(ip, recent);
+    return false;
+  }
+
+  app.post("/api/contact", async (req, res) => {
+    try {
+      const ip =
+        (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+        req.socket.remoteAddress ||
+        "unknown";
+      if (isRateLimited(ip)) {
+        return res
+          .status(429)
+          .json({ message: "Too many submissions. Please try again later." });
+      }
+
+      // Defense-in-depth: backend re-validates email format, interest enum,
+      // and message length so the API can't be hit with anything the frontend
+      // schema would have rejected.
+      const data = insertContactSubmissionSchema
+        .extend({
+          email: z.string().email("Valid email required").max(254),
+          interestType: z.enum([
+            "platforms",
+            "consulting",
+            "investment",
+            "careers",
+            "other",
+          ]),
+          message: z.string().min(10).max(4000),
+          name: z.string().min(1).max(120),
+        })
+        .parse({
+          ...req.body,
+          ipAddress: ip,
+          userAgent: req.headers["user-agent"] ?? null,
+        });
+
+      const submission = await storage.createContactSubmission(data);
+
+      // Fire-and-forget — don't block the response on email delivery.
+      sendContactNotification(submission)
+        .then(ok => { if (ok) return storage.markNotificationSent(submission.id); })
+        .catch(console.error);
+      sendContactConfirmation(submission)
+        .then(ok => { if (ok) return storage.markConfirmationSent(submission.id); })
+        .catch(console.error);
+
+      res.status(200).json({ ok: true });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid form data", issues: err.issues });
+      }
+      console.error("Contact submission failed:", err);
+      res
+        .status(500)
+        .json({ message: "Failed to submit. Please try emailing info@llt.llc directly." });
     }
   });
 

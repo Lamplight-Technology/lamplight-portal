@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -34,7 +34,8 @@ import {
   Tag,
   Upload,
   Copy,
-  Eye
+  Eye,
+  Clock
 } from "lucide-react";
 import type { Company, Platform, LegalDocument, AboutFeatureCard, HeroBadge, MediaFile } from "@shared/schema";
 import { insertCompanySchema, insertPlatformSchema, insertLegalDocumentSchema, insertAboutFeatureCardSchema, insertHeroBadgeSchema } from "@shared/schema";
@@ -400,6 +401,7 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
       link: "",
       logo: "",
       isActive: true,
+      comingSoon: false,
       sortOrder: 0,
     },
   });
@@ -582,6 +584,7 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
         link: data.link,
         logo: data.logo,
         isActive: data.isActive,
+        comingSoon: data.comingSoon ?? false,
         sortOrder: adminPlatforms.length + 1,
       });
       setShowUrlImport(false);
@@ -859,6 +862,7 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
       link: platform.link,
       logo: platform.logo || "",
       isActive: platform.isActive,
+      comingSoon: platform.comingSoon ?? false,
       sortOrder: platform.sortOrder,
     });
     setShowPlatformForm(true);
@@ -873,6 +877,7 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
       link: "",
       logo: "",
       isActive: true,
+      comingSoon: false,
       sortOrder: adminPlatforms.length + 1,
     });
     setShowPlatformForm(true);
@@ -2121,7 +2126,15 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                                 <ProjectorIcon className="h-6 w-6 text-lamplight-accent" />
                               </div>
                               <div>
-                                <h4 className="font-semibold text-lamplight-primary">{platform.name}</h4>
+                                <h4 className="font-semibold text-lamplight-primary flex items-center">
+                                  {platform.name}
+                                  {platform.comingSoon && (
+                                    <Badge variant="secondary" className="ml-2">
+                                      <Clock className="h-3 w-3 mr-1" />
+                                      Coming Soon
+                                    </Badge>
+                                  )}
+                                </h4>
                                 <p className="text-sm text-slate-600">{platform.category}</p>
                                 <div className="flex items-center gap-2 mt-1">
                                   <Badge variant={platform.isActive ? "default" : "secondary"}>
@@ -2633,13 +2646,34 @@ export default function AdminPanel({ company, platforms, onClose }: AdminPanelPr
                 render={({ field }) => (
                   <FormItem className="flex items-center space-x-2">
                     <FormControl>
-                      <Switch 
-                        checked={field.value || false} 
-                        onCheckedChange={field.onChange} 
+                      <Switch
+                        checked={field.value || false}
+                        onCheckedChange={field.onChange}
                       />
                     </FormControl>
                     <FormLabel>Active</FormLabel>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={platformForm.control}
+                name="comingSoon"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel>Coming Soon</FormLabel>
+                      <FormDescription>
+                        Show this platform with a "Coming Soon" badge instead of a Launch link.
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value ?? false}
+                        onCheckedChange={field.onChange}
+                        data-testid="switch-platform-coming-soon"
+                      />
+                    </FormControl>
                   </FormItem>
                 )}
               />

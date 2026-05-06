@@ -164,3 +164,27 @@ export const insertLegalDocumentSchema = createInsertSchema(legalDocuments).omit
 
 export type InsertLegalDocument = z.infer<typeof insertLegalDocumentSchema>;
 export type LegalDocument = typeof legalDocuments.$inferSelect;
+
+export const contactSubmissions = pgTable("contact_submissions", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  company: text("company"),
+  email: text("email").notNull(),
+  interestType: text("interest_type").notNull(), // platforms | consulting | investment | careers | other
+  message: text("message").notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  notificationSent: boolean("notification_sent").default(false),
+  confirmationSent: boolean("confirmation_sent").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertContactSubmissionSchema = createInsertSchema(contactSubmissions).omit({
+  id: true,
+  notificationSent: true,
+  confirmationSent: true,
+  createdAt: true,
+});
+
+export type InsertContactSubmission = z.infer<typeof insertContactSubmissionSchema>;
+export type ContactSubmission = typeof contactSubmissions.$inferSelect;
