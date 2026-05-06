@@ -33,16 +33,18 @@ export default function Footer({ company }: FooterProps) {
           <div>
             <h4 className="text-lg font-semibold mb-4 text-blue-400">Quick Links</h4>
             <ul className="space-y-2">
-              <li><a href="#home" className="text-slate-300 hover:text-blue-400 transition-colors">Home</a></li>
+              <li><a href="/" className="text-slate-300 hover:text-blue-400 transition-colors">Home</a></li>
               {company?.showAbout !== false && (
-                <li><a href="#about" className="text-slate-300 hover:text-blue-400 transition-colors">About Us</a></li>
+                <li><a href="/about" className="text-slate-300 hover:text-blue-400 transition-colors">About Us</a></li>
               )}
               {company?.showPlatforms !== false && (
-                <li><a href="#platforms" className="text-slate-300 hover:text-blue-400 transition-colors">Our Platforms</a></li>
+                <li><a href="/platforms" className="text-slate-300 hover:text-blue-400 transition-colors">Our Platforms</a></li>
               )}
+              <li><a href="/careers" className="text-slate-300 hover:text-blue-400 transition-colors">Careers</a></li>
               {company?.showContact !== false && (
-                <li><a href="#contact" className="text-slate-300 hover:text-blue-400 transition-colors">Contact</a></li>
+                <li><a href="/contact" className="text-slate-300 hover:text-blue-400 transition-colors">Contact</a></li>
               )}
+              <li><a href="/insights" className="text-slate-300 hover:text-blue-400 transition-colors">Insights</a></li>
             </ul>
           </div>
 
